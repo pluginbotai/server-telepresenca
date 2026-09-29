@@ -142,7 +142,6 @@ jobs:
 
                   # GitHub Environment secrets exposed as Cloud Run env vars.
                   env_vars: |
-                      PORT=${{ env.PORT }}
                       ROBOTS_API_URL=${{ vars.STG_ROBOTS_API_URL }}
                       CORS_ORIGIN=${{ vars.STG_CORS_ORIGIN || env.CORS_ORIGIN }}
                       STUN_URLS=${{ vars.STG_STUN_URLS || env.STUN_URLS }}
