@@ -1,0 +1,173 @@
+# Build and deploy the telepresence signaling server to Cloud Run (production).
+#
+# Trigger: push to the "main" branch, or manual run.
+#
+# Overview:
+#
+# 1. Authenticate to Google Cloud
+# 2. Authenticate Docker to Artifact Registry
+# 3. Build a Docker container
+# 4. Publish it to Google Artifact Registry
+# 5. Deploy it to Cloud Run
+#
+# One-time setup:
+#
+# 1. Ensure the required Google Cloud APIs are enabled:
+#
+#    Cloud Run            run.googleapis.com
+#    Artifact Registry    artifactregistry.googleapis.com
+#
+# 2. Create the Artifact Registry repository "telepresence" in us-east4
+#    on project pj-robots-prd.
+#
+# 3. Ensure the GitHub deploy service account has:
+#
+#    Cloud Run
+#      roles/run.admin
+#      roles/iam.serviceAccountUser
+#
+#    Artifact Registry
+#      roles/artifactregistry.writer
+#
+# 4. Create the GitHub environment "production" with:
+#
+#    Variables
+#      PRD_ROBOTS_API_URL
+#      PRD_CORS_ORIGIN
+#      PRD_STUN_URLS
+#      PRD_TURN_URLS
+#
+#    Secrets
+#      PRD_TURN_USERNAME
+#      PRD_TURN_CREDENTIAL
+#
+# Rooms live in process memory, so the service stays at one instance
+# with session affinity and CPU always allocated (WebSocket + expiry timers).
+
+name: Build and Deploy to Cloud Run (production)
+
+on:
+    push:
+        branches: ['main']
+    workflow_dispatch:
+
+permissions:
+    contents: 'read'
+    id-token: 'write'
+
+env:
+    PROJECT_ID: pj-robots-prd
+    SERVICE: telepresence
+    REGION: us-east4
+    PORT: 8080
+
+    # GitHub Actions deploy identity
+    WIF_SERVICE_ACCOUNT: sa-deploy-pj-robots-prd@pj-robots-prd.iam.gserviceaccount.com
+    WIF_PROVIDER: projects/919923113672/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+
+    # Artifact Registry
+    REPO_NAME: us-east4-docker.pkg.dev/pj-robots-prd/telepresence
+
+    # Existing VPC connector
+    SVA: projects/pj-pluginbot-mgmt/locations/us-east4/connectors/sva-vpc-robots-prd
+
+    # Default values.
+    # These can be overridden by GitHub Environment Variables.
+    CORS_ORIGIN: '*'
+
+    STUN_URLS: stun:stun.l.google.com:19302,stun:stun1.l.google.com:19302,stun:stun.relay.metered.ca:80
+
+    TURN_URLS: turn:global.relay.metered.ca:80,turn:global.relay.metered.ca:80?transport=tcp,turn:global.relay.metered.ca:443,turns:global.relay.metered.ca:443?transport=tcp
+
+jobs:
+    Build_Deploy_Cloud_Run:
+        runs-on: ubuntu-latest
+
+        environment:
+            name: 'production'
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Authenticate to Google Cloud
+              id: auth
+              uses: google-github-actions/auth@v3
+              with:
+                  token_format: access_token
+                  access_token_lifetime: 600s
+                  workload_identity_provider: ${{ env.WIF_PROVIDER }}
+                  service_account: ${{ env.WIF_SERVICE_ACCOUNT }}
+
+            - name: Set up Cloud SDK
+              uses: google-github-actions/setup-gcloud@v2
+
+            - name: Login Registry
+              uses: docker/login-action@v3
+              with:
+                  registry: us-east4-docker.pkg.dev
+                  username: oauth2accesstoken
+                  password: ${{ steps.auth.outputs.access_token }}
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Cache Docker layers
+              uses: actions/cache@v4
+              with:
+                  path: /tmp/.buildx-cache
+                  key: ${{ runner.os }}-buildx-${{ github.sha }}
+                  restore-keys: |
+                      ${{ runner.os }}-buildx-
+
+            - name: Build and Push
+              uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  push: true
+                  tags: ${{ env.REPO_NAME }}/${{ env.SERVICE }}:${{ github.sha }}
+                  file: Dockerfile
+                  cache-from: type=local,src=/tmp/.buildx-cache
+                  cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+                  build-args: |
+                      VERSION=${{ github.sha }}
+
+            - name: Deploy to Cloud Run
+              id: deploy
+              uses: google-github-actions/deploy-cloudrun@v3
+              with:
+                  service: ${{ env.SERVICE }}
+                  region: ${{ env.REGION }}
+                  image: ${{ env.REPO_NAME }}/${{ env.SERVICE }}:${{ github.sha }}
+
+                  # GitHub Environment secrets exposed as Cloud Run env vars.
+                  env_vars: |
+                      PORT=${{ env.PORT }}
+                      ROBOTS_API_URL=${{ vars.PRD_ROBOTS_API_URL }}
+                      CORS_ORIGIN=${{ vars.PRD_CORS_ORIGIN || env.CORS_ORIGIN }}
+                      STUN_URLS=${{ vars.PRD_STUN_URLS || env.STUN_URLS }}
+                      TURN_URLS=${{ vars.PRD_TURN_URLS || env.TURN_URLS }}
+                      TURN_USERNAME=${{ secrets.PRD_TURN_USERNAME }}
+                      TURN_CREDENTIAL=${{ secrets.PRD_TURN_CREDENTIAL }}
+
+                  flags: >
+                      --allow-unauthenticated
+                      --vpc-connector=${{ env.SVA }}
+                      --port=${{ env.PORT }}
+                      --cpu=1
+                      --memory=512Mi
+                      --concurrency=1000
+                      --min-instances=1
+                      --max-instances=1
+                      --timeout=3600
+                      --session-affinity
+                      --no-cpu-throttling
+                      --cpu-boost
+
+            - name: Show Cloud Run URL
+              run: echo "${{ steps.deploy.outputs.url }}"
+
+            - name: Post Cache Docker layers
+              run: |
+                  rm -rf /tmp/.buildx-cache
+                  mv /tmp/.buildx-cache-new /tmp/.buildx-cache
