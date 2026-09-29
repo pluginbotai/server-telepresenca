@@ -5,7 +5,7 @@
 
 ## Monday Task
 
--   Task Link: https://my-teste-company.monday.com/boards/xxxxx/pulses/xxxxx
+- Task Link: https://my-teste-company.monday.com/boards/xxxxx/pulses/xxxxx
 
 ## Description
 
@@ -13,8 +13,8 @@
 
 This pull request addresses the following tasks:
 
--   [feat] Implement user profile update functionality
--   [docs] Update documentation for user profile endpoints
+- [feat] Implement user profile update functionality
+- [docs] Update documentation for user profile endpoints
 
 ## Screenshots (if applicable)
 
