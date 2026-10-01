@@ -196,7 +196,7 @@
               <span class="joy-chevron w" aria-hidden="true"></span>
               <div class="joystick-stick"></div>
             </div>
-            <p class="joystick-hint" id="movementHint"></p>
+            <p class="joystick-hint" id="movementHint" hidden></p>
           </div>
 
           <div
@@ -225,9 +225,7 @@
             aria-expanded="false"
             aria-controls="robotDrawer"
             data-i18n-aria="media.robotControlsOpen"
-            data-i18n-title="media.robotControlsOpen"
             aria-label="Abrir controles do robô"
-            title="Abrir controles do robô"
           >
             <svg
               class="quick-dock-icon"
@@ -249,9 +247,7 @@
             id="btnQuickVolume"
             class="quick-dock-btn"
             data-i18n-aria="volume.panel"
-            data-i18n-title="volume.panel"
             aria-label="Volume do robô"
-            title="Volume do robô"
           >
             <svg class="quick-dock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M4.5 9.5h3.2L12 6.2v11.6L7.7 14.5H4.5V9.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
@@ -263,9 +259,7 @@
             id="btnQuickHeadReset"
             class="quick-dock-btn"
             data-i18n-aria="media.headReset"
-            data-i18n-title="media.headReset"
             aria-label="Centralizar câmera"
-            title="Centralizar câmera"
             hidden
           >
             <svg class="quick-dock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -278,9 +272,7 @@
             id="btnQuickFlashlight"
             class="quick-dock-btn"
             data-i18n-aria="media.flashlight"
-            data-i18n-title="media.flashlight"
             aria-label="Lanterna"
-            title="Lanterna"
             hidden
           >
             <svg class="quick-dock-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -344,24 +336,30 @@
           </div>
 
           <div class="robot-drawer-body" id="robotDrawerBody">
-            <div
+            <section
+              id="drawerLocomotionSpeedHost"
+              class="robot-drawer-section"
+              data-host="locomotion-speed"
+              hidden
+            ></section>
+            <section
               id="volumeHost"
-              class="robot-drawer-card volume-host"
+              class="robot-drawer-section volume-host"
               data-host="volume"
               hidden
-            ></div>
-            <div
+            ></section>
+            <section
               id="drawerFlashlightHost"
-              class="robot-drawer-card"
+              class="robot-drawer-section robot-drawer-section--action"
               data-host="flashlight"
               hidden
-            ></div>
-            <div
+            ></section>
+            <section
               id="drawerHeadHost"
-              class="robot-drawer-card"
+              class="robot-drawer-section robot-drawer-section--action"
               data-host="head-drawer"
               hidden
-            ></div>
+            ></section>
           </div>
         </aside>
 

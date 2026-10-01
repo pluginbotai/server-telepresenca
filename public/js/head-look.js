@@ -68,6 +68,7 @@ export function createHeadLookSurface(layer, options) {
 
   function onPointerDown(event) {
     if (!enabled) return;
+    if (event.target?.closest?.(".head-edge-rail")) return;
     if (event.button != null && event.button !== 0) return;
     if (pointerId != null) return;
     pointerId = event.pointerId;

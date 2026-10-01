@@ -1,3 +1,4 @@
+import { createHeadEdgeSliders } from "../head-edge-sliders.js";
 import { createHeadLookSurface } from "../head-look.js";
 import {
   addLook,
@@ -18,6 +19,7 @@ export function createHeadFeature(els, t) {
   let caps = null;
   let pose = { yaw: 0, pitch: 0 };
   let surface = null;
+  let edgeSliders = null;
   /** @type {import("./registry.js").FeatureContext | null} */
   let ctx = null;
   /** @type {Set<string>} */
@@ -69,6 +71,7 @@ export function createHeadFeature(els, t) {
 
   function setPose(next, send) {
     pose = parseLookValue(next);
+    if (edgeSliders) edgeSliders.setPose(pose);
     if (send) scheduleSend();
   }
 
@@ -79,6 +82,7 @@ export function createHeadFeature(els, t) {
 
   function resetLook() {
     pose = { yaw: 0, pitch: 0 };
+    if (edgeSliders) edgeSliders.setPose(pose);
     pending = false;
     if (sendTimer) {
       clearTimeout(sendTimer);
@@ -149,6 +153,7 @@ export function createHeadFeature(els, t) {
 
   function setEnabled(enabled) {
     if (surface) surface.setEnabled(enabled);
+    if (edgeSliders) edgeSliders.setEnabled(enabled);
     if (!enabled) {
       stopKeys();
       applyPreview(null);
@@ -172,6 +177,16 @@ export function createHeadFeature(els, t) {
       );
       setHostHidden(false);
       if (els.headLookLayer) {
+        edgeSliders = createHeadEdgeSliders(els.headLookLayer, {
+          t,
+          onAxis: (axis, value) => {
+            setPose({ ...pose, [axis]: value }, true);
+            markUsed();
+          },
+        });
+        edgeSliders.setAxes(axes());
+        edgeSliders.setPose(pose);
+        edgeSliders.refreshLabels();
         surface = createHeadLookSurface(els.headLookLayer, {
           onDelta: applyDelta,
           onReset: resetLook,
@@ -195,6 +210,10 @@ export function createHeadFeature(els, t) {
         window.removeEventListener("blur", onBlur);
         window.removeEventListener("keydown", onKeyDown);
         window.removeEventListener("keyup", onKeyUp);
+        if (edgeSliders) {
+          edgeSliders.destroy();
+          edgeSliders = null;
+        }
         if (surface) {
           surface.destroy();
           surface = null;
@@ -208,6 +227,7 @@ export function createHeadFeature(els, t) {
       caps = nextCaps;
       ctx = nextCtx;
       if (surface) surface.setAxes(axes());
+      if (edgeSliders) edgeSliders.setAxes(axes());
       setHostHidden(!isHeadAvailable(nextCaps));
     },
     setEnabled,
@@ -216,6 +236,7 @@ export function createHeadFeature(els, t) {
         els.headLookLayer.setAttribute("aria-label", t("head.layer"));
         els.headLookLayer.title = t("head.hintKeyboard");
       }
+      if (edgeSliders) edgeSliders.refreshLabels();
     },
   };
 }

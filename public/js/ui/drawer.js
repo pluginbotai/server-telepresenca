@@ -1,6 +1,7 @@
 import {
   isFlashlightAvailable,
   isHeadAvailable,
+  isLocomotionSpeedAvailable,
   isVolumeAvailable,
 } from "../protocol/capabilities.js";
 
@@ -12,7 +13,10 @@ import {
 export function isRobotDrawerAvailable(caps) {
   if (!caps) return false;
   return (
-    isVolumeAvailable(caps) || isFlashlightAvailable(caps) || isHeadAvailable(caps)
+    isLocomotionSpeedAvailable(caps) ||
+    isVolumeAvailable(caps) ||
+    isFlashlightAvailable(caps) ||
+    isHeadAvailable(caps)
   );
 }
 
@@ -33,7 +37,6 @@ function updateDrawerLabels({
   const label = t(labelKey);
   if (toggleBtn) {
     toggleBtn.setAttribute("aria-label", label);
-    toggleBtn.title = label;
     const arrowEl = toggleBtn.querySelector?.(".panel-icon-arrow");
     if (arrowEl) {
       arrowEl.setAttribute("d", open ? "m8 9 3 3-3 3" : "m10 15-3-3 3-3");
@@ -51,15 +54,12 @@ function updateDrawerLabels({
   }
   if (btnQuickVolume) {
     btnQuickVolume.setAttribute("aria-label", t("volume.panel"));
-    btnQuickVolume.title = t("volume.panel");
   }
   if (btnQuickHeadReset) {
     btnQuickHeadReset.setAttribute("aria-label", t("media.headReset"));
-    btnQuickHeadReset.title = t("media.headReset");
   }
   if (btnQuickFlashlight) {
     btnQuickFlashlight.setAttribute("aria-label", t("media.flashlight"));
-    btnQuickFlashlight.title = t("media.flashlight");
   }
   if (btnMockToggle) {
     const mockLabel = t(isMockActive ? "media.mockDisable" : "media.mockEnable");

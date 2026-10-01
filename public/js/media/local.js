@@ -68,14 +68,9 @@ export function createMediaController({
           "aria-label",
           t("media.screenShareUnsupported"),
         );
-        els.btnToggleScreenShare.setAttribute(
-          "title",
-          t("media.screenShareUnsupported"),
-        );
       } else {
         const key = sharing ? "media.screenShareOn" : "media.screenShareOff";
         els.btnToggleScreenShare.setAttribute("aria-label", t(key));
-        els.btnToggleScreenShare.setAttribute("title", t(key));
       }
     }
     if (typeof onMediaStateChange === "function") {

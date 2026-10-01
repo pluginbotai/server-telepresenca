@@ -3,6 +3,10 @@ const MOCK_CRUZR_CAPS = {
   locomotion: {
     available: true,
     backwardMode: "continuous",
+    speed: true,
+    speedMin: 0.35,
+    speedMax: 1,
+    speedDefault: 1,
   },
   audio: {
     beep: true,
@@ -31,6 +35,10 @@ const MOCK_TEMI_CAPS = {
     available: true,
     backwardMode: "pulse",
     backwardPulseDistanceM: 0.2,
+    speed: true,
+    speedMin: 0.35,
+    speedMax: 1,
+    speedDefault: 0.75,
   },
   audio: {
     beep: true,
@@ -108,3 +116,19 @@ export function getMockStatus(type = "cruzr") {
     },
   };
 }
+
+/**
+ * Resolves whether the mock toggle button should be visible.
+ * The mock button only appears when no real robot is connected or present in the room.
+ *
+ * @param {object} [state]
+ * @param {boolean} [state.connected]
+ * @param {object | null} [state.liveCapabilities]
+ * @returns {boolean}
+ */
+export function shouldShowMockToggle({ connected = false, liveCapabilities = null } = {}) {
+  if (connected) return false;
+  if (liveCapabilities && Object.keys(liveCapabilities).length > 0) return false;
+  return true;
+}
+

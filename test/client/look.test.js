@@ -8,6 +8,7 @@ import {
   lookKeyDelta,
   parseLookValue,
 } from "../../public/js/protocol/look.js";
+import { createHeadEdgeSliders } from "../../public/js/head-edge-sliders.js";
 import { createHeadLookSurface } from "../../public/js/head-look.js";
 import { createHeadFeature } from "../../public/js/features/head.js";
 import { headAxes, isHeadAvailable } from "../../public/js/protocol/capabilities.js";
@@ -69,7 +70,8 @@ test("head feature mounts only when advertised", () => {
 function mockLayer() {
   const listeners = {};
   const classes = new Set();
-  return {
+  const layer = {
+    hidden: false,
     classList: {
       add: (name) => classes.add(name),
       remove: (name) => classes.delete(name),
@@ -91,10 +93,101 @@ function mockLayer() {
     getBoundingClientRect() {
       return { width: 200, height: 100, left: 0, top: 0 };
     },
+    prepend(...nodes) {
+      layer.edgeRails = {};
+      for (const node of nodes) {
+        if (node.dataset?.axis) layer.edgeRails[node.dataset.axis] = node;
+      }
+    },
+    edgeRails: {},
     listeners,
     classes,
   };
+  return layer;
 }
+
+function mockDocument() {
+  return {
+    createElement(tag) {
+      if (tag === "input") {
+        return {
+          type: "range",
+          className: "",
+          value: "0",
+          min: "-100",
+          max: "100",
+          step: "1",
+          disabled: false,
+          listeners: {},
+          addEventListener(type, fn) {
+            this.listeners[type] = fn;
+          },
+          setAttribute() {},
+        };
+      }
+      const node = {
+        className: "",
+        dataset: {},
+        hidden: false,
+        innerHTML: "",
+        style: { setProperty() {} },
+        children: [],
+        setAttribute() {},
+        append(...kids) {
+          this.children.push(...kids);
+          for (const kid of kids) {
+            if (kid.className === "head-edge-input") this.input = kid;
+          }
+        },
+        remove() {},
+      };
+      return node;
+    },
+  };
+}
+
+test("head edge sliders hide yaw when axis unavailable", () => {
+  const prevDoc = globalThis.document;
+  globalThis.document = mockDocument();
+  const layer = mockLayer();
+  const ui = createHeadEdgeSliders(layer, { onAxis: () => {} });
+  ui.setAxes({ yaw: false, pitch: true });
+  assert.equal(layer.classes.has("head-edge--pitch-only"), true);
+  ui.destroy();
+  globalThis.document = prevDoc;
+});
+
+test("head edge sliders report normalized axis values", () => {
+  const prevDoc = globalThis.document;
+  globalThis.document = mockDocument();
+  const layer = mockLayer();
+  const calls = [];
+  const ui = createHeadEdgeSliders(layer, {
+    onAxis: (axis, value) => calls.push({ axis, value }),
+  });
+  const yawRail = layer.edgeRails.yaw;
+  assert.ok(yawRail?.input?.listeners?.input);
+  yawRail.input.value = "40";
+  yawRail.input.listeners.input();
+  assert.deepEqual(calls[0], { axis: "yaw", value: 0.4 });
+  ui.destroy();
+  globalThis.document = prevDoc;
+});
+
+test("head-look surface ignores pointerdown on edge rails", () => {
+  const layer = mockLayer();
+  const deltas = [];
+  createHeadLookSurface(layer, { onDelta: (delta) => deltas.push(delta) });
+  layer.listeners.pointerdown({
+    pointerId: 1,
+    button: 0,
+    clientX: 10,
+    clientY: 10,
+    target: { closest: (sel) => (sel === ".head-edge-rail" ? {} : null) },
+    preventDefault() {},
+  });
+  assert.equal(deltas.length, 0);
+});
 
 test("head-look surface reports grab deltas while dragging", () => {
   const layer = mockLayer();

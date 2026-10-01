@@ -4,6 +4,7 @@ import { beepFeature } from "../../public/js/features/beep.js";
 import { flashlightFeature } from "../../public/js/features/flashlight.js";
 import { createHeadFeature } from "../../public/js/features/head.js";
 import { createLocomotionFeature } from "../../public/js/features/locomotion.js";
+import { createLocomotionSpeedFeature } from "../../public/js/features/locomotion-speed.js";
 import { createPowerFeature } from "../../public/js/features/power.js";
 import { createVolumeFeature } from "../../public/js/features/volume.js";
 
@@ -22,7 +23,10 @@ test("feature widgets expose id, opt-in and availability helpers", () => {
   assert.equal(beepFeature.isAvailable({ audio: { beep: false } }), false);
 
   const locomotion = createLocomotionFeature({}, (key) => key);
+  const locomotionSpeed = createLocomotionSpeedFeature({}, (key) => key);
   assert.equal(locomotion.id, "locomotion");
+  assert.equal(locomotionSpeed.id, "locomotion-speed");
+  assert.equal(locomotionSpeed.optIn, true);
   assert.equal(locomotion.optIn, false);
   assert.equal(locomotion.isAvailable(null), true);
   assert.equal(typeof locomotion.mount, "function");

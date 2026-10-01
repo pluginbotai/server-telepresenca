@@ -20,7 +20,9 @@ export const flashlightFeature = {
 
     const btn = document.createElement("button");
     btn.type = "button";
-    const isDrawer = host.dataset?.host === "flashlight";
+    const isDrawer =
+      host.dataset?.host === "flashlight" ||
+      host.classList?.contains("robot-drawer-section");
     btn.className = isDrawer ? "robot-drawer-btn" : "ctrl";
     btn.dataset.feature = "flashlight";
     btn.innerHTML = isDrawer

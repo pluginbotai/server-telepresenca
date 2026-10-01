@@ -35,6 +35,13 @@ test("volume.set with level validates", () => {
   assert.equal(validate({ action: "volume.set", value: { level: 5 } }), true);
 });
 
+test("locomotion.speed.set with factor validates", () => {
+  assert.equal(
+    validate({ action: "locomotion.speed.set", value: { factor: 0.75 } }),
+    true,
+  );
+});
+
 test("schema examples are valid", () => {
   for (const example of schema.examples) {
     assert.equal(validate(example), true, JSON.stringify(example));

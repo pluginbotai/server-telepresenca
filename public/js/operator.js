@@ -2,6 +2,7 @@ import { beepFeature } from "./features/beep.js";
 import { flashlightFeature } from "./features/flashlight.js";
 import { createHeadFeature } from "./features/head.js";
 import { createLocomotionFeature } from "./features/locomotion.js";
+import { createLocomotionSpeedFeature } from "./features/locomotion-speed.js";
 import { createPowerFeature } from "./features/power.js";
 import { createFeatureRegistry } from "./features/registry.js";
 import { createVideoQualityFeature, savePresetId } from "./features/video-quality.js";
@@ -41,6 +42,7 @@ import {
   getMockStatus,
   isMockRequested,
   resolveMockType,
+  shouldShowMockToggle,
 } from "./features/mock-robot.js";
 import { createStatus } from "./ui/status.js";
 import { initTooltips } from "./ui/tooltip.js";
@@ -121,12 +123,14 @@ export function createOperator({
   let callStartInFlight = false;
 
   const locomotion = createLocomotionFeature(els, t);
+  const locomotionSpeed = createLocomotionSpeedFeature(els, t);
   const head = createHeadFeature(els, t);
   const videoQuality = createVideoQualityFeature(els, t);
   const power = createPowerFeature(els, t);
   const volume = createVolumeFeature(els, t);
   const registry = createFeatureRegistry([
     locomotion,
+    locomotionSpeed,
     head,
     beepFeature,
     videoQuality,
@@ -316,13 +320,21 @@ export function createOperator({
     if (flashlightBtn) flashlightBtn.disabled = !canControl;
   }
 
+  function updateMockToggleVisibility() {
+    if (!els.btnToggleMockRobot) return;
+    const shouldShow = shouldShowMockToggle({
+      connected,
+      liveCapabilities: liveRobotCapabilities,
+    });
+    els.btnToggleMockRobot.hidden = !shouldShow;
+  }
+
   function setMockRobotActive(active, model = "cruzr") {
     isMockActive = Boolean(active);
     if (els.btnToggleMockRobot) {
       els.btnToggleMockRobot.classList.toggle("is-active", isMockActive);
       const mockKey = isMockActive ? "media.mockDisable" : "media.mockEnable";
       els.btnToggleMockRobot.setAttribute("aria-label", t(mockKey));
-      els.btnToggleMockRobot.title = t(mockKey);
     }
 
     if (isMockActive) {
@@ -336,11 +348,16 @@ export function createOperator({
       updateControlEnabling();
     }
     robotDrawer.refreshLabels({ isMockActive });
+    updateMockToggleVisibility();
   }
 
   function setConnectedUi(isConnectedFlag) {
     connected = isConnectedFlag;
     connecting = false;
+    if (isConnectedFlag && isMockActive) {
+      setMockRobotActive(false);
+    }
+    updateMockToggleVisibility();
     els.btnHangup.disabled = !isConnectedFlag;
     els.btnToggleMic.disabled = !isConnectedFlag;
     els.btnToggleCam.disabled = !isConnectedFlag;
@@ -383,19 +400,15 @@ export function createOperator({
     if (els.btnToggleMockRobot) {
       const mockKey = isMockActive ? "media.mockDisable" : "media.mockEnable";
       els.btnToggleMockRobot.setAttribute("aria-label", t(mockKey));
-      els.btnToggleMockRobot.title = t(mockKey);
     }
     if (els.btnQuickVolume) {
       els.btnQuickVolume.setAttribute("aria-label", t("volume.panel"));
-      els.btnQuickVolume.title = t("volume.panel");
     }
     if (els.btnQuickHeadReset) {
       els.btnQuickHeadReset.setAttribute("aria-label", t("media.headReset"));
-      els.btnQuickHeadReset.title = t("media.headReset");
     }
     if (els.btnQuickFlashlight) {
       els.btnQuickFlashlight.setAttribute("aria-label", t("media.flashlight"));
-      els.btnQuickFlashlight.title = t("media.flashlight");
     }
     if (els.btnToggleRobotDrawer) {
       const drawerOpen = els.robotDrawer?.classList.contains("is-open");
@@ -403,7 +416,6 @@ export function createOperator({
         ? "media.robotControlsClose"
         : "media.robotControlsOpen";
       els.btnToggleRobotDrawer.setAttribute("aria-label", t(toggleKey));
-      els.btnToggleRobotDrawer.title = t(toggleKey);
     }
     if (els.robotQuickDock) {
       els.robotQuickDock.setAttribute("aria-label", t("media.quickDock"));
@@ -524,19 +536,26 @@ export function createOperator({
       } else {
         registry.apply(robotCapabilities, featureContext());
       }
+      updateMockToggleVisibility();
       if (payload.peerPresent) {
         await beginCallWithRobot();
       }
     });
 
     socket.on(EVENT_PEER_JOINED, async (payload) => {
+      if (isMockActive) {
+        setMockRobotActive(false);
+      }
       if (payload?.robotCapabilities) {
         applyRobotCapabilities(payload.robotCapabilities);
       }
+      updateMockToggleVisibility();
       await beginCallWithRobot();
     });
 
     socket.on(EVENT_PEER_LEFT, () => {
+      liveRobotCapabilities = null;
+      updateMockToggleVisibility();
       meteredAllowed = false;
       peer.cleanupPeer();
       status.setPlaceholder("status.waitingRobot");
@@ -545,9 +564,13 @@ export function createOperator({
 
     socket.on(EVENT_ROOM_STATE, (state) => {
       liveRobotCapabilities = state?.robotCapabilities || null;
+      if (liveRobotCapabilities && isMockActive) {
+        setMockRobotActive(false);
+      }
       if (!isMockActive && state?.robotCapabilities) {
         applyRobotCapabilities(state.robotCapabilities);
       }
+      updateMockToggleVisibility();
     });
 
     socket.on(EVENT_SIGNAL, async (message) => {
@@ -702,6 +725,7 @@ export function createOperator({
         const targetModel = resolveMockType(window.location.search);
         setMockRobotActive(!isMockActive, targetModel);
       });
+      updateMockToggleVisibility();
     }
 
     if (els.btnQuickHeadReset) {
@@ -740,6 +764,7 @@ export function createOperator({
       tooltips.update();
     });
     refreshDynamicText();
+    tooltips.update();
     countdown.start();
   }
 

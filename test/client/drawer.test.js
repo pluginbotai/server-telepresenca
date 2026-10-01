@@ -71,6 +71,10 @@ test("isRobotDrawerAvailable returns true only when robot has drawer capabilitie
   assert.equal(isRobotDrawerAvailable({}), false);
   assert.equal(isRobotDrawerAvailable({ locomotion: { available: true } }), false);
 
+  assert.equal(
+    isRobotDrawerAvailable({ locomotion: { speed: true } }),
+    true,
+  );
   assert.equal(isRobotDrawerAvailable({ audio: { volume: true } }), true);
   assert.equal(isRobotDrawerAvailable({ flashlight: { available: true } }), true);
   assert.equal(isRobotDrawerAvailable({ head: { available: true } }), true);
@@ -207,7 +211,7 @@ test("createRobotDrawer wires quick volume shortcut and quick dock integration",
   assert.equal(drawerEl.classList.contains("is-open"), true);
 });
 
-test("createRobotDrawer synchronizes title and aria attributes on all quick dock buttons", () => {
+test("createRobotDrawer synchronizes aria on quick dock (HUD tooltip, not native title)", () => {
   const drawerEl = createMockElement();
   const toggleBtn = createMockElement();
   const closeBtn = createMockElement();
@@ -242,11 +246,8 @@ test("createRobotDrawer synchronizes title and aria attributes on all quick dock
 
   drawer.refreshLabels();
 
-  assert.equal(btnQuickVolume.title, "Volume do robô");
   assert.equal(btnQuickVolume.getAttribute("aria-label"), "Volume do robô");
-  assert.equal(btnQuickHeadReset.title, "Centralizar câmera");
   assert.equal(btnQuickHeadReset.getAttribute("aria-label"), "Centralizar câmera");
-  assert.equal(btnQuickFlashlight.title, "Lanterna");
   assert.equal(btnQuickFlashlight.getAttribute("aria-label"), "Lanterna");
   assert.equal(btnMockToggle.title, "Simular robô conectado");
   assert.equal(btnMockToggle.getAttribute("aria-label"), "Simular robô conectado");

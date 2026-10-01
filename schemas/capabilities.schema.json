@@ -25,7 +25,11 @@
         "frontObstacleSensor": { "type": "boolean" },
         "turnSignInverted": { "type": "boolean" },
         "backwardPulseDistanceM": { "type": "number", "exclusiveMinimum": 0 },
-        "backwardPulseCooldownMs": { "type": "integer", "minimum": 0 }
+        "backwardPulseCooldownMs": { "type": "integer", "minimum": 0 },
+        "speed": { "type": "boolean" },
+        "speedMin": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "speedMax": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "speedDefault": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
       }
     },
     "videoPreset": {

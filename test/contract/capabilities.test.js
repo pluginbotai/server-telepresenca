@@ -7,9 +7,12 @@ import {
   isFlashlightAvailable,
   isHeadAvailable,
   isLocomotionAvailable,
+  isLocomotionSpeedAvailable,
   isPowerAvailable,
   isVolumeAvailable,
+  locomotionSpeedRange,
   normalizeCapabilities,
+  snapLocomotionSpeedFactor,
 } from "../../public/js/protocol/capabilities.js";
 import { compileSchema, readJson } from "../helpers/load-schema.js";
 
@@ -64,6 +67,15 @@ test("locomotion pulse vs continuous", () => {
   assert.equal(isContinuousBackward(cruzr), false);
   assert.equal(isContinuousBackward(flashlightRobot), true);
   assert.equal(isLocomotionAvailable({ locomotion: { available: false } }), false);
+});
+
+test("locomotion speed control is opt-in", () => {
+  assert.equal(isLocomotionSpeedAvailable(null), false);
+  assert.equal(isLocomotionSpeedAvailable(cruzr), true);
+  const range = locomotionSpeedRange(cruzr);
+  assert.equal(range.default, 1);
+  assert.equal(snapLocomotionSpeedFactor(0.72, range), 0.75);
+  assert.equal(snapLocomotionSpeedFactor(0.55, range), 0.75);
 });
 
 test("backward pulse defaults to 20cm", () => {

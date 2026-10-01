@@ -55,16 +55,28 @@ export function createLocomotionFeature(els, t) {
     if (els.locomotionHost) els.locomotionHost.hidden = hidden;
   }
 
-  function updateMovementHint() {
-    if (!els.movementHint) return;
+  function movementHoverHint() {
+    const parts = [t("movement.hintKeyboard")];
     if (isContinuousBackward(caps)) {
-      els.movementHint.textContent = t("movement.hintContinuous");
-      return;
+      parts.push(t("movement.hintContinuous"));
+    } else {
+      parts.push(
+        t("movement.hintPulse", {
+          cm: Math.round(backwardPulseDistanceM(caps) * 100),
+        }),
+      );
     }
-    const dist = backwardPulseDistanceM(caps);
-    els.movementHint.textContent = t("movement.hintPulse", {
-      cm: Math.round(dist * 100),
-    });
+    return parts.join(" · ");
+  }
+
+  function updateMovementHint() {
+    const hint = movementHoverHint();
+    if (els.joystick) els.joystick.title = hint;
+    if (els.kbdHint) {
+      els.kbdHint.title = hint;
+      els.kbdHint.setAttribute("aria-label", hint);
+    }
+    if (els.movementHint) els.movementHint.textContent = "";
   }
 
   function setKeyFeedback(key, on) {
@@ -247,10 +259,6 @@ export function createLocomotionFeature(els, t) {
     refreshLabels() {
       if (els.joystick) {
         els.joystick.setAttribute("aria-label", t("movement.joystick"));
-        els.joystick.title = t("movement.hintKeyboard");
-      }
-      if (els.kbdHint) {
-        els.kbdHint.setAttribute("aria-label", t("movement.hintKeyboard"));
       }
       updateMovementHint();
     },

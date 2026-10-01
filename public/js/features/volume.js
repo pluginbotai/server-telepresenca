@@ -1,6 +1,10 @@
 import { isVolumeAvailable, volumeRange } from "../protocol/capabilities.js";
 import { parseRobotStatus, parseVolumeLevel } from "../protocol/status.js";
 import { bindPopoverDismiss, createPopover } from "../ui/popover.js";
+import {
+  createDrawerSectionHead,
+  createDrawerSectionInner,
+} from "../ui/robot-drawer-section.js";
 
 const ICON = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
   <path d="M4.5 9.5h3.2L12 6.2v11.6L7.7 14.5H4.5V9.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
@@ -23,6 +27,7 @@ export function createVolumeFeature(els, t) {
   let button = null;
   let slider = null;
   let valueEl = null;
+  let badgeEl = null;
   let panel = null;
   let titleEl = null;
   let closeBtn = null;
@@ -36,18 +41,33 @@ export function createVolumeFeature(els, t) {
     return t("volume.level", { level });
   }
 
+  function volumeFillPercent() {
+    if (max <= min) return 0;
+    return ((level - min) / (max - min)) * 100;
+  }
+
   function syncUi() {
     if (slider) {
       slider.min = String(min);
       slider.max = String(max);
       slider.value = String(level);
+      slider.setAttribute("aria-valuemin", String(min));
+      slider.setAttribute("aria-valuemax", String(max));
+      slider.setAttribute("aria-valuenow", String(level));
+      if (isDrawerMode) {
+        slider.setAttribute("aria-label", t("volume.panel"));
+        const pct = volumeFillPercent();
+        slider.style.setProperty("--volume-fill", `${pct}%`);
+      }
     }
     if (valueEl) valueEl.textContent = String(level);
+    if (badgeEl) badgeEl.textContent = String(level);
     if (button) {
       if (isDrawerMode) {
         const isMuted = level <= min;
         const muteKey = isMuted ? "volume.unmute" : "volume.mute";
         button.setAttribute("aria-label", t(muteKey));
+        button.setAttribute("aria-pressed", isMuted ? "true" : "false");
         button.title = t(muteKey);
         button.innerHTML = isMuted ? ICON_MUTED : ICON;
       } else {
@@ -110,67 +130,40 @@ export function createVolumeFeature(els, t) {
       if (!host) return () => {};
       host.hidden = false;
 
-      isDrawerMode = host.classList.contains("robot-drawer-card");
+      isDrawerMode = host.classList.contains("robot-drawer-section");
 
       if (isDrawerMode) {
-        root = document.createElement("div");
-        root.className = "robot-drawer-volume-inner";
-        root.dataset.feature = "volume";
-
-        const head = document.createElement("div");
-        head.className = "robot-drawer-card-head";
-
-        const labelWrap = document.createElement("div");
-        labelWrap.className = "robot-drawer-card-label";
-        const iconSpan = document.createElement("span");
-        iconSpan.innerHTML = ICON;
-        titleEl = document.createElement("span");
-        titleEl.textContent = t("volume.panel");
-        labelWrap.append(iconSpan, titleEl);
-
-        valueEl = document.createElement("span");
-        valueEl.className = "robot-drawer-card-badge";
-        head.append(labelWrap, valueEl);
-
         const sliderRow = document.createElement("div");
-        sliderRow.className = "robot-drawer-slider-row";
+        sliderRow.className = "robot-drawer-volume-row";
+        sliderRow.setAttribute("role", "group");
+        sliderRow.setAttribute("aria-label", t("volume.panel"));
 
         button = document.createElement("button");
         button.type = "button";
-        button.className = "robot-drawer-close";
+        button.className = "robot-drawer-mute-btn";
         button.innerHTML = ICON;
+
+        const sliderWrap = document.createElement("div");
+        sliderWrap.className = "volume-slider-wrap";
 
         slider = document.createElement("input");
         slider.type = "range";
-        slider.className = "robot-drawer-slider volume-slider";
+        slider.className = "volume-slider volume-slider--drawer";
         slider.step = "1";
+        slider.title = t("volume.sliderHint");
 
-        const presetsRow = document.createElement("div");
-        presetsRow.className = "robot-drawer-presets";
+        sliderWrap.append(slider);
+        sliderRow.append(button, sliderWrap);
 
-        const btnHalf = document.createElement("button");
-        btnHalf.type = "button";
-        btnHalf.className = "robot-drawer-preset-btn";
-        btnHalf.textContent = t("volume.presetLow");
-        btnHalf.addEventListener("click", () => {
-          if (!ctx?.isConnected()) return;
-          setLevel(Math.round((max + min) / 2), true);
-          sendLevel(false);
-        });
+        const { head, titleEl: sectionTitle, badgeEl: sectionBadge } =
+          createDrawerSectionHead({
+            title: t("volume.panel"),
+            badgeText: String(level),
+          });
+        titleEl = sectionTitle;
+        badgeEl = sectionBadge;
 
-        const btnFull = document.createElement("button");
-        btnFull.type = "button";
-        btnFull.className = "robot-drawer-preset-btn";
-        btnFull.textContent = t("volume.presetMax");
-        btnFull.addEventListener("click", () => {
-          if (!ctx?.isConnected()) return;
-          setLevel(max, true);
-          sendLevel(false);
-        });
-
-        presetsRow.append(btnHalf, btnFull);
-        sliderRow.append(button, slider);
-        root.append(head, sliderRow, presetsRow);
+        root = createDrawerSectionInner("volume", head, sliderRow);
         host.appendChild(root);
 
         let lastNonZero = level > min ? level : max;
@@ -203,7 +196,15 @@ export function createVolumeFeature(els, t) {
           slider.removeEventListener("input", onInput);
           slider.removeEventListener("change", onChange);
           root.remove();
-          root = button = slider = valueEl = panel = titleEl = closeBtn = null;
+          root =
+            button =
+            slider =
+            valueEl =
+            badgeEl =
+            panel =
+            titleEl =
+            closeBtn =
+              null;
           host.hidden = true;
           ctx = null;
           isDrawerMode = false;

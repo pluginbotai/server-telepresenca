@@ -44,6 +44,22 @@ function resolveLabel(el, customResolver) {
 }
 
 /**
+ * Evita tooltip nativo do browser em paralelo ao `.hud-tooltip`.
+ * @param {HTMLElement | Document} root
+ * @param {string} selector
+ */
+export function suppressNativeTitles(root, selector) {
+  const nodes =
+    typeof root.querySelectorAll === "function"
+      ? root.querySelectorAll(selector)
+      : [];
+  for (const el of nodes) {
+    if (!el?.hasAttribute?.("title")) continue;
+    el.removeAttribute("title");
+  }
+}
+
+/**
  * @param {any} target
  * @param {string} selector
  * @returns {HTMLElement | null}
@@ -209,6 +225,11 @@ export function initTooltips(root, selector = ".ctrl", options = {}) {
     onDismiss: hide,
   });
 
+  function syncManagedElements() {
+    suppressNativeTitles(root, selector);
+  }
+  syncManagedElements();
+
   return {
     destroy() {
       hide();
@@ -216,6 +237,7 @@ export function initTooltips(root, selector = ".ctrl", options = {}) {
       if (createdElement && tooltipEl?.remove) tooltipEl.remove();
     },
     update() {
+      syncManagedElements();
       if (currentTarget && tooltipEl?.classList.contains("is-visible")) {
         show(currentTarget);
       }

@@ -5,7 +5,11 @@
     "frontObstacleSensor": true,
     "turnSignInverted": true,
     "backwardPulseDistanceM": 0.2,
-    "backwardPulseCooldownMs": 400
+    "backwardPulseCooldownMs": 400,
+    "speed": true,
+    "speedMin": 0.35,
+    "speedMax": 1,
+    "speedDefault": 1
   },
   "audio": {
     "beep": true,

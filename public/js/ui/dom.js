@@ -58,6 +58,7 @@ export function queryDom() {
     robotDrawerBackdrop: document.getElementById("robotDrawerBackdrop"),
     robotDrawerBody: document.getElementById("robotDrawerBody"),
     drawerFlashlightHost: document.getElementById("drawerFlashlightHost"),
+    drawerLocomotionSpeedHost: document.getElementById("drawerLocomotionSpeedHost"),
     drawerHeadHost: document.getElementById("drawerHeadHost"),
     robotQuickDock: document.getElementById("robotQuickDock"),
     btnQuickVolume: document.getElementById("btnQuickVolume"),
@@ -78,6 +79,9 @@ export function hostById(id, els) {
   if (id === "head" || id === "head-look") return els.headLookLayer;
   if (id === "power") return els.powerHost;
   if (id === "volume") return els.volumeHost;
+  if (id === "locomotion-speed") {
+    return els.drawerLocomotionSpeedHost;
+  }
   if (id === "flashlight") return els.drawerFlashlightHost || els.featureHost;
   if (id === "head-drawer") return els.drawerHeadHost;
   return document.querySelector(`[data-host="${id}"]`);

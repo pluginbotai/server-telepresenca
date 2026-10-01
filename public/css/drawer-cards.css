@@ -1,0 +1,356 @@
+/* Flat sections inside the glass drawer — no nested card surfaces (NN/g: one glass shell). */
+
+.robot-drawer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.robot-drawer-section[hidden] {
+  display: none !important;
+}
+
+/* Ritmo vertical no body (gap) + divisor com respiro acima da linha — evita colar no controle anterior */
+.robot-drawer-body > .robot-drawer-section:not([hidden]) + .robot-drawer-section:not([hidden]) {
+  margin-top: 4px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.robot-drawer-section--action {
+  gap: 0;
+}
+
+.robot-drawer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.robot-drawer-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.robot-drawer-volume-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+}
+
+.robot-drawer-mute-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+  padding: 0;
+  transition:
+    background-color 0.14s ease,
+    border-color 0.14s ease,
+    color 0.14s ease;
+}
+
+.robot-drawer-mute-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.robot-drawer-mute-btn[aria-pressed="true"] {
+  color: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.robot-drawer-mute-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.robot-drawer-mute-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.volume-slider-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 2px;
+}
+
+.volume-slider-value {
+  flex: none;
+  min-width: 2ch;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.75);
+  text-align: right;
+}
+
+.volume-slider--drawer {
+  --volume-fill: 50%;
+  --volume-track: rgba(255, 255, 255, 0.16);
+  width: 100%;
+  margin: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 44px;
+  background: transparent;
+}
+
+.volume-slider--drawer:focus {
+  outline: none;
+}
+
+.volume-slider--drawer:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.volume-slider--drawer::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--accent) 0%,
+    var(--accent) var(--volume-fill),
+    var(--volume-track) var(--volume-fill),
+    var(--volume-track) 100%
+  );
+}
+
+.volume-slider--drawer::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  background: var(--accent);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+  transition: transform 0.12s var(--ease-snappy);
+}
+
+.volume-slider--drawer:active::-webkit-slider-thumb {
+  transform: scale(1.08);
+}
+
+.volume-slider--drawer::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--volume-track);
+}
+
+.volume-slider--drawer::-moz-range-progress {
+  height: 6px;
+  border-radius: 999px 0 0 999px;
+  background: var(--accent);
+}
+
+.volume-slider--drawer::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  background: var(--accent);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+}
+
+.robot-drawer-presets {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.robot-drawer-preset-btn {
+  flex: 1;
+  min-height: 36px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.14s ease,
+    border-color 0.14s ease,
+    color 0.14s ease;
+}
+
+.robot-drawer-preset-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.robot-drawer-segmented {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+}
+
+.robot-drawer-segment-btn {
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  cursor: pointer;
+  transition:
+    background 0.14s ease,
+    border-color 0.14s ease,
+    color 0.14s ease,
+    box-shadow 0.14s ease;
+}
+
+.robot-drawer-segment-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.robot-drawer-segment-btn.is-active {
+  color: #041414;
+  background: rgba(43, 176, 166, 0.92);
+  border-color: rgba(43, 176, 166, 0.55);
+  box-shadow: 0 2px 10px rgba(43, 176, 166, 0.28);
+}
+
+.robot-drawer-segment-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.robot-drawer-segment-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.robot-drawer-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.86rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease;
+}
+
+.robot-drawer-btn svg {
+  width: 18px;
+  height: 18px;
+  max-width: 18px;
+  max-height: 18px;
+  flex: none;
+}
+
+.robot-drawer-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.11);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.robot-drawer-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.robot-drawer-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 28px;
+}
+
+.robot-drawer-section-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.01em;
+}
+
+.robot-drawer-section-label--text-only {
+  gap: 0;
+}
+
+.robot-drawer-section-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  flex: none;
+  color: var(--accent);
+  background: rgba(43, 176, 166, 0.1);
+  border: 1px solid rgba(43, 176, 166, 0.18);
+}
+
+.robot-drawer-section-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.robot-drawer-section-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.robot-drawer-section-badge {
+  flex: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(43, 176, 166, 0.1);
+  border: 1px solid rgba(43, 176, 166, 0.2);
+}
