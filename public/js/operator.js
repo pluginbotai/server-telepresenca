@@ -7,6 +7,7 @@ import { createFeatureRegistry } from "./features/registry.js";
 import { createVideoQualityFeature, savePresetId } from "./features/video-quality.js";
 import { createVolumeFeature } from "./features/volume.js";
 import { createMediaController } from "./media/local.js";
+import { createLocalPreviewController } from "./media/local-preview.js";
 import { normalizeCapabilities } from "./protocol/capabilities.js";
 import {
   EVENT_JOINED,
@@ -24,9 +25,15 @@ import { createSessionCountdown } from "./invite/countdown.js";
 import {
   endedOverlayState,
   isTransientDisconnect,
+  monitorInviteRejoinExpiry,
   paintCallEnded,
   RECONNECT_GRACE_MS,
 } from "./invite/reconnect.js";
+import {
+  canReturnToPlatform,
+  returnToPreviousOrUrl,
+  startRedirectCountdown,
+} from "./invite/redirect.js";
 import { bindLangSwitch } from "./ui/lang-switch.js";
 import { createStatus } from "./ui/status.js";
 import { initTooltips } from "./ui/tooltip.js";
@@ -70,6 +77,8 @@ export function createOperator({
   let graceTimer = null;
   let endedByExpiry = false;
   let endedByReplace = false;
+  let redirectController = null;
+  let inviteExpiryMonitor = null;
   const countdown = createSessionCountdown({
     els,
     t,
@@ -129,12 +138,23 @@ export function createOperator({
     },
   });
 
+  /** @type {ReturnType<typeof createLocalPreviewController> | null} */
+  let localPreview = null;
+
   const media = createMediaController({
     els,
     t,
     getPc: () => peer.getPc(),
     startCallAsOfferer: () => peer.startCallAsOfferer(),
     getSocket: () => signaling.getSocket(),
+    onMediaStateChange: () => localPreview?.sync(),
+  });
+
+  localPreview = createLocalPreviewController({
+    els,
+    t,
+    getStream: () => media.getLocalStream(),
+    getCamTrack: () => media.getLocalStream()?.getVideoTracks()?.[0] || null,
   });
 
   function isConnected() {
@@ -211,6 +231,7 @@ export function createOperator({
     if (els.btnVideoQuality) els.btnVideoQuality.disabled = !isConnectedFlag;
     if (els.btnSendCommand) els.btnSendCommand.disabled = !isConnectedFlag;
     media.refreshMediaButtons(isConnectedFlag);
+    localPreview?.setConnected(isConnectedFlag);
     locomotion.setEnabled(isConnectedFlag);
     head.setEnabled(isConnectedFlag);
     volume.setEnabled(isConnectedFlag);
@@ -242,6 +263,7 @@ export function createOperator({
     videoQuality.refreshLabels();
     registry.refreshLabels();
     media.refreshMediaButtons(connected);
+    localPreview?.refreshLabels();
     const flashlightBtn = els.featureHost?.querySelector('[data-feature="flashlight"]');
     if (flashlightBtn) {
       flashlightBtn.setAttribute("aria-label", t("media.flashlight"));
@@ -268,6 +290,15 @@ export function createOperator({
       els,
       t,
     );
+    if (inviteBound && expiresAt) {
+      if (inviteExpiryMonitor) inviteExpiryMonitor.stop();
+      inviteExpiryMonitor = monitorInviteRejoinExpiry({
+        inviteBound,
+        expiresAt,
+        els,
+        t,
+      });
+    }
   }
 
   function armGrace() {
@@ -288,6 +319,10 @@ export function createOperator({
       if (allowed === false) return;
     }
     connecting = true;
+    if (inviteExpiryMonitor) {
+      inviteExpiryMonitor.stop();
+      inviteExpiryMonitor = null;
+    }
     meteredAllowed = false;
     status.showEnded(false);
     status.setPlaceholder("status.connecting");
@@ -381,6 +416,7 @@ export function createOperator({
       peer.cleanupPeer();
       status.setPlaceholder("status.endedByRobot");
       status.setStatus("status.endedByRobot", "online");
+      disconnect({ ended: true, endedByRobot: true });
     });
 
     socket.on(EVENT_REPLACED, () => {
@@ -412,7 +448,33 @@ export function createOperator({
     });
   }
 
-  function disconnect({ ended = true } = {}) {
+  function triggerReturnRedirect() {
+    if (!canReturnToPlatform(inviteBound)) return;
+    if (redirectController) return;
+
+    if (els.btnReturnNow) els.btnReturnNow.classList.remove("hidden");
+    if (els.btnCancelRedirect) els.btnCancelRedirect.classList.remove("hidden");
+    if (els.redirectCountdown) {
+      els.redirectCountdown.classList.remove("hidden");
+      els.redirectCountdown.textContent = t("call.redirecting", { seconds: 5 });
+    }
+
+    redirectController = startRedirectCountdown({
+      countdownSeconds: 5,
+      onTick(remaining) {
+        if (els.redirectCountdown) {
+          els.redirectCountdown.textContent = t("call.redirecting", { seconds: remaining });
+        }
+      },
+      onRedirect() {
+        if (els.redirectCountdown) els.redirectCountdown.classList.add("hidden");
+        if (els.btnReturnNow) els.btnReturnNow.classList.add("hidden");
+        if (els.btnCancelRedirect) els.btnCancelRedirect.classList.add("hidden");
+      },
+    });
+  }
+
+  function disconnect({ ended = true, endedByRobot = false } = {}) {
     clearGrace();
     countdown.stop();
     locomotion.stopMovement(true);
@@ -422,7 +484,10 @@ export function createOperator({
     media.stopLocal();
     setConnectedUi(false);
     media.refreshMediaButtons(false);
-    if (ended) paintEnded({ expired: endedByExpiry, replaced: endedByReplace });
+    if (ended) {
+      paintEnded({ expired: endedByExpiry, replaced: endedByReplace, endedByRobot });
+      triggerReturnRedirect();
+    }
   }
 
   function bind() {
@@ -430,10 +495,40 @@ export function createOperator({
 
     els.btnHangup.addEventListener("click", () => disconnect({ ended: true }));
     els.btnRejoin.addEventListener("click", () => {
+      if (inviteExpiryMonitor) {
+        inviteExpiryMonitor.stop();
+        inviteExpiryMonitor = null;
+      }
+      if (redirectController) {
+        redirectController.cancel();
+        redirectController = null;
+        if (els.redirectCountdown) els.redirectCountdown.classList.add("hidden");
+        if (els.btnReturnNow) els.btnReturnNow.classList.add("hidden");
+        if (els.btnCancelRedirect) els.btnCancelRedirect.classList.add("hidden");
+      }
       endedByExpiry = false;
       endedByReplace = false;
       connect({ force: true }).catch((err) => console.error(err));
     });
+    if (els.btnReturnNow) {
+      els.btnReturnNow.addEventListener("click", () => {
+        if (redirectController) {
+          redirectController.executeNow();
+        } else {
+          returnToPreviousOrUrl();
+        }
+      });
+    }
+    if (els.btnCancelRedirect) {
+      els.btnCancelRedirect.addEventListener("click", () => {
+        if (redirectController) {
+          redirectController.cancel();
+          redirectController = null;
+        }
+        if (els.redirectCountdown) els.redirectCountdown.classList.add("hidden");
+        if (els.btnCancelRedirect) els.btnCancelRedirect.classList.add("hidden");
+      });
+    }
     els.btnToggleMic.addEventListener("click", () => {
       media.toggleMic(connected).catch((err) => console.error(err));
     });
@@ -445,6 +540,8 @@ export function createOperator({
         media.toggleScreenShare(connected).catch((err) => console.error(err));
       });
     }
+
+    localPreview?.bind();
 
     const tooltips = initTooltips(els.callBar || document, ".ctrl");
 

@@ -57,6 +57,13 @@
   .quality-tick-label {
     font-size: 0.54rem;
   }
+
+  .local-preview {
+    left: max(12px, env(safe-area-inset-left));
+    right: auto;
+    bottom: calc(102px + env(safe-area-inset-bottom));
+    width: clamp(96px, 28vw, 168px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -15,6 +15,7 @@ export function createMediaController({
   getPc,
   startCallAsOfferer,
   getSocket,
+  onMediaStateChange,
 }) {
   let localStream = null;
   let mediaRequest = null;
@@ -76,6 +77,9 @@ export function createMediaController({
         els.btnToggleScreenShare.setAttribute("aria-label", t(key));
         els.btnToggleScreenShare.setAttribute("title", t(key));
       }
+    }
+    if (typeof onMediaStateChange === "function") {
+      onMediaStateChange();
     }
   }
 

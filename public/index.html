@@ -8,7 +8,7 @@
     />
     <meta name="theme-color" content="#0b0f14" />
     <title>TelePlugin</title>
-    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
     <link rel="stylesheet" href="style.css" />
     <script src="/socket.io/socket.io.js"></script>
   </head>
@@ -46,6 +46,36 @@
         <div class="remote-overlay" id="remotePlaceholder">
           <div class="waiting-mark" aria-hidden="true"></div>
           <p data-i18n="status.waitingRobot">Aguardando o robô…</p>
+        </div>
+
+        <div id="localPreview" class="local-preview" hidden>
+          <div class="local-preview-frame">
+            <video
+              id="localPreviewVideo"
+              class="local-preview-video"
+              autoplay
+              playsinline
+              muted
+              data-i18n-aria="media.selfView"
+              aria-label="Sua câmera"
+            ></video>
+            <button
+              type="button"
+              id="btnLocalPreviewClose"
+              class="local-preview-close"
+              data-i18n-aria="media.selfViewHide"
+              aria-label="Ocultar pré-visualização da câmera"
+            >
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M6 6l12 12M18 6 6 18"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <header class="hud-top">
@@ -409,10 +439,26 @@
         ></div>
 
         <div id="endedOverlay" class="ended-overlay hidden">
-          <p data-i18n="call.ended">Chamada encerrada</p>
-          <button id="btnRejoin" class="rejoin" type="button" data-i18n="call.rejoin">
-            Entrar novamente
-          </button>
+          <div class="ended-card">
+            <div class="ended-card-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" class="ended-icon">
+                <path d="M12 9v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <p id="endedTitle" class="ended-title" data-i18n="call.ended">Chamada encerrada</p>
+            <p id="redirectCountdown" class="redirect-countdown hidden" data-i18n="call.redirecting"></p>
+            <div class="ended-actions">
+              <button id="btnReturnNow" class="btn-ended-primary hidden" type="button" data-i18n="call.returnNow">
+                Voltar para a plataforma
+              </button>
+              <button id="btnCancelRedirect" class="btn-ended-ghost hidden" type="button" data-i18n="call.cancelRedirect">
+                Cancelar
+              </button>
+              <button id="btnRejoin" class="btn-ended-secondary rejoin" type="button" data-i18n="call.rejoin">
+                Entrar novamente
+              </button>
+            </div>
+          </div>
         </div>
 
         <div id="inviteOverlay" class="ended-overlay hidden">
