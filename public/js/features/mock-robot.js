@@ -118,17 +118,33 @@ export function getMockStatus(type = "cruzr") {
 }
 
 /**
+ * Mock UI só em ambiente de teste (localhost ou ?mock/?demo na URL).
+ * @param {string | null | undefined} [search]
+ */
+export function isMockUiEnabled(search) {
+  if (isMockRequested(search)) return true;
+  if (typeof location === "undefined") return false;
+  const host = location.hostname;
+  return host === "localhost" || host === "127.0.0.1";
+}
+
+/**
  * Resolves whether the mock toggle button should be visible.
  * The mock button only appears when no real robot is connected or present in the room.
  *
  * @param {object} [state]
- * @param {boolean} [state.connected]
- * @param {object | null} [state.liveCapabilities]
+ * @param {boolean} [state.robotPeerPresent]
+ * @param {boolean} [state.rtcWithRobot]
+ * @param {string | null | undefined} [state.search]
  * @returns {boolean}
  */
-export function shouldShowMockToggle({ connected = false, liveCapabilities = null } = {}) {
-  if (connected) return false;
-  if (liveCapabilities && Object.keys(liveCapabilities).length > 0) return false;
+export function shouldShowMockToggle({
+  robotPeerPresent = false,
+  rtcWithRobot = false,
+  search = typeof location !== "undefined" ? location.search : "",
+} = {}) {
+  if (!isMockUiEnabled(search)) return false;
+  if (robotPeerPresent || rtcWithRobot) return false;
   return true;
 }
 

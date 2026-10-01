@@ -31,8 +31,6 @@ export function queryDom() {
     roomLabel: document.getElementById("roomLabel"),
     endedOverlay: document.getElementById("endedOverlay"),
     redirectCountdown: document.getElementById("redirectCountdown"),
-    btnReturnNow: document.getElementById("btnReturnNow"),
-    btnCancelRedirect: document.getElementById("btnCancelRedirect"),
     inviteOverlay: document.getElementById("inviteOverlay"),
     inviteOverlayText: document.getElementById("inviteOverlayText"),
     inviteLogo: document.getElementById("inviteLogo"),

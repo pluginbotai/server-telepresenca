@@ -79,6 +79,61 @@ export function headAxes(caps) {
 
 /**
  * @param {object | null | undefined} caps
+ * @returns {"full" | "window"}
+ */
+export function headRangeMode(caps) {
+  return caps?.head?.rangeMode === "window" ? "window" : "full";
+}
+
+/**
+ * @param {object | null | undefined} caps
+ * @param {"yaw" | "pitch"} axis
+ */
+export function headAxisLimit(caps, axis) {
+  const block = caps?.head?.limits?.[axis];
+  if (!block || typeof block !== "object") return null;
+  const minDeg = Number(block.minDeg);
+  const maxDeg = Number(block.maxDeg);
+  if (!Number.isFinite(minDeg) || !Number.isFinite(maxDeg) || maxDeg <= minDeg) {
+    return null;
+  }
+  const windowDeg = Number(block.windowDeg);
+  return {
+    minDeg,
+    maxDeg,
+    windowDeg: Number.isFinite(windowDeg) && windowDeg > 0 ? windowDeg : null,
+  };
+}
+
+/**
+ * @param {object | null | undefined} caps
+ */
+export function headMapping(caps) {
+  const map = caps?.head?.mapping;
+  return {
+    yawInverted: map?.yawInverted === true,
+    pitchInverted: map?.pitchInverted === true,
+  };
+}
+
+/**
+ * Map normalized [-1, 1] to degrees using advertised mechanical limits.
+ * @param {number} norm
+ * @param {{ minDeg: number, maxDeg: number } | null} limit
+ * @param {boolean} inverted
+ */
+export function headNormToDeg(norm, limit, inverted = false) {
+  if (!limit) return null;
+  let n = norm;
+  if (typeof n !== "number" || Number.isNaN(n)) n = 0;
+  if (n > 1) n = 1;
+  if (n < -1) n = -1;
+  if (inverted) n = -n;
+  return limit.minDeg + ((n + 1) / 2) * (limit.maxDeg - limit.minDeg);
+}
+
+/**
+ * @param {object | null | undefined} caps
  */
 export function isContinuousBackward(caps) {
   return caps?.locomotion?.backwardMode === "continuous";

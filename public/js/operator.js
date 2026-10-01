@@ -118,6 +118,8 @@ export function createOperator({
   let meteredAllowed = false;
   let connected = false;
   let connecting = false;
+  let robotPeerPresent = false;
+  let rtcWithRobot = false;
   let robotCapabilities = null;
   let qualityApplying = false;
   let callStartInFlight = false;
@@ -156,6 +158,8 @@ export function createOperator({
     setStatus: status.setStatus,
     onRemoteVideo(reason) {
       if (reason === "connected" || reason === "track") {
+        rtcWithRobot = true;
+        updateMockToggleVisibility();
         const preset = videoQuality.getPanel()?.getSelectedPreset();
         if (preset) {
           applyOutgoingVideoQuality(peer.getPc(), preset).catch((err) =>
@@ -227,7 +231,10 @@ export function createOperator({
     };
   }
 
-  function applyRobotCapabilities(caps) {
+  function applyRobotCapabilities(caps, { fromMock = false } = {}) {
+    if (!fromMock && caps && typeof caps === "object") {
+      liveRobotCapabilities = caps;
+    }
     robotCapabilities = normalizeCapabilities(caps);
     videoQuality.applyCapabilities(robotCapabilities);
     registry.apply(robotCapabilities, featureContext());
@@ -269,6 +276,7 @@ export function createOperator({
         els.drawerHeadHost.innerHTML = "";
       }
     }
+    updateMockToggleVisibility();
   }
 
   async function handleQualityPresetChange(preset) {
@@ -323,8 +331,9 @@ export function createOperator({
   function updateMockToggleVisibility() {
     if (!els.btnToggleMockRobot) return;
     const shouldShow = shouldShowMockToggle({
-      connected,
-      liveCapabilities: liveRobotCapabilities,
+      robotPeerPresent,
+      rtcWithRobot,
+      search: window.location.search,
     });
     els.btnToggleMockRobot.hidden = !shouldShow;
   }
@@ -339,7 +348,7 @@ export function createOperator({
 
     if (isMockActive) {
       const mockCaps = getMockCapabilities(model);
-      applyRobotCapabilities(mockCaps);
+      applyRobotCapabilities(mockCaps, { fromMock: true });
       const mockStatus = getMockStatus(model);
       registry.applyStatus(mockStatus);
       updateControlEnabling();
@@ -518,8 +527,11 @@ export function createOperator({
         disconnect({ ended: true });
         return;
       }
+      if (ack?.robot) robotPeerPresent = true;
       if (ack?.robotCapabilities) {
         applyRobotCapabilities(ack.robotCapabilities);
+      } else {
+        updateMockToggleVisibility();
       }
     });
 
@@ -531,6 +543,7 @@ export function createOperator({
       countdown.start();
       status.setPlaceholder("status.waitingRobot");
       status.setStatus("status.waitingRobot", "online");
+      robotPeerPresent = Boolean(payload?.peerPresent);
       if (payload?.robotCapabilities) {
         applyRobotCapabilities(payload.robotCapabilities);
       } else {
@@ -543,6 +556,7 @@ export function createOperator({
     });
 
     socket.on(EVENT_PEER_JOINED, async (payload) => {
+      robotPeerPresent = true;
       if (isMockActive) {
         setMockRobotActive(false);
       }
@@ -554,6 +568,8 @@ export function createOperator({
     });
 
     socket.on(EVENT_PEER_LEFT, () => {
+      robotPeerPresent = false;
+      rtcWithRobot = false;
       liveRobotCapabilities = null;
       updateMockToggleVisibility();
       meteredAllowed = false;
@@ -563,6 +579,7 @@ export function createOperator({
     });
 
     socket.on(EVENT_ROOM_STATE, (state) => {
+      robotPeerPresent = Boolean(state?.robot);
       liveRobotCapabilities = state?.robotCapabilities || null;
       if (liveRobotCapabilities && isMockActive) {
         setMockRobotActive(false);
@@ -628,8 +645,6 @@ export function createOperator({
     if (!canReturnToPlatform(inviteBound)) return;
     if (redirectController) return;
 
-    if (els.btnReturnNow) els.btnReturnNow.classList.remove("hidden");
-    if (els.btnCancelRedirect) els.btnCancelRedirect.classList.remove("hidden");
     if (els.redirectCountdown) {
       els.redirectCountdown.classList.remove("hidden");
       els.redirectCountdown.textContent = t("call.redirecting", { seconds: 5 });
@@ -646,8 +661,6 @@ export function createOperator({
       },
       onRedirect() {
         if (els.redirectCountdown) els.redirectCountdown.classList.add("hidden");
-        if (els.btnReturnNow) els.btnReturnNow.classList.add("hidden");
-        if (els.btnCancelRedirect) els.btnCancelRedirect.classList.add("hidden");
       },
     });
   }
@@ -661,6 +674,8 @@ export function createOperator({
     signaling.hangupAndLeave();
     peer.cleanupPeer();
     media.stopLocal();
+    robotPeerPresent = false;
+    rtcWithRobot = false;
     setConnectedUi(false);
     media.refreshMediaButtons(false);
     if (ended) {
@@ -682,32 +697,11 @@ export function createOperator({
         redirectController.cancel();
         redirectController = null;
         if (els.redirectCountdown) els.redirectCountdown.classList.add("hidden");
-        if (els.btnReturnNow) els.btnReturnNow.classList.add("hidden");
-        if (els.btnCancelRedirect) els.btnCancelRedirect.classList.add("hidden");
       }
       endedByExpiry = false;
       endedByReplace = false;
       connect({ force: true }).catch((err) => console.error(err));
     });
-    if (els.btnReturnNow) {
-      els.btnReturnNow.addEventListener("click", () => {
-        if (redirectController) {
-          redirectController.executeNow();
-        } else {
-          returnToPreviousOrUrl();
-        }
-      });
-    }
-    if (els.btnCancelRedirect) {
-      els.btnCancelRedirect.addEventListener("click", () => {
-        if (redirectController) {
-          redirectController.cancel();
-          redirectController = null;
-        }
-        if (els.redirectCountdown) els.redirectCountdown.classList.add("hidden");
-        if (els.btnCancelRedirect) els.btnCancelRedirect.classList.add("hidden");
-      });
-    }
     els.btnToggleMic.addEventListener("click", () => {
       media.toggleMic(connected).catch((err) => console.error(err));
     });

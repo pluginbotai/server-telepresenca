@@ -12,9 +12,19 @@
     "audio": { "$ref": "#/$defs/audio" },
     "flashlight": { "$ref": "#/$defs/flashlight" },
     "head": { "$ref": "#/$defs/head" },
+    "control": { "$ref": "#/$defs/control" },
     "power": { "$ref": "#/$defs/power" }
   },
   "$defs": {
+    "headAxisLimit": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "minDeg": { "type": "number" },
+        "maxDeg": { "type": "number" },
+        "windowDeg": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
     "locomotion": {
       "type": "object",
       "additionalProperties": true,
@@ -96,7 +106,35 @@
       "properties": {
         "available": { "type": "boolean" },
         "yaw": { "type": "boolean" },
-        "pitch": { "type": "boolean" }
+        "pitch": { "type": "boolean" },
+        "rangeMode": { "enum": ["full", "window"] },
+        "mapping": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "yawInverted": { "type": "boolean" },
+            "pitchInverted": { "type": "boolean" }
+          }
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "yaw": { "$ref": "#/$defs/headAxisLimit" },
+            "pitch": { "$ref": "#/$defs/headAxisLimit" }
+          }
+        }
+      }
+    },
+    "control": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "lease": { "enum": ["single-operator"] },
+        "continuousLatestWins": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
       }
     }
   }

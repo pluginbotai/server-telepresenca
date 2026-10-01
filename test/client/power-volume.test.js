@@ -12,9 +12,22 @@ test("parseRobotStatus reads battery advertised on join capabilities", () => {
 });
 
 test("parseRobotStatus ignores incomplete payloads", () => {
-  assert.deepEqual(parseRobotStatus(null), { power: null, audio: null });
+  assert.deepEqual(parseRobotStatus(null), { power: null, audio: null, head: null });
   assert.equal(parseRobotStatus({ power: { charging: true } }).power, null);
   assert.equal(parseRobotStatus({ audio: { min: 0 } }).audio, null);
+});
+
+test("parseRobotStatus reads head telemetry", () => {
+  const parsed = parseRobotStatus({
+    head: {
+      pitch: 0.42,
+      source: "measured",
+      atLimit: { pitchMin: false, pitchMax: true },
+    },
+  });
+  assert.equal(parsed.head.pitch, 0.42);
+  assert.equal(parsed.head.source, "measured");
+  assert.equal(parsed.head.atLimit.pitchMax, true);
 });
 
 test("parseVolumeLevel clamps object and number values", () => {

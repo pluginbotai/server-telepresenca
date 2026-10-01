@@ -3,10 +3,12 @@
  * @param {HTMLElement} layer
  * @param {object} options
  * @param {(axis: "yaw" | "pitch", value: number) => void} options.onAxis
+ * @param {(axis: "yaw" | "pitch", norm: number) => string | null} [options.formatAxisValue]
  * @param {(key: string) => string} [options.t]
  */
 export function createHeadEdgeSliders(layer, options) {
   const onAxis = options.onAxis || (() => {});
+  const formatAxisValue = options.formatAxisValue || (() => null);
   const t = options.t || ((key) => key);
 
   const IDLE_MS = 3200;
@@ -35,7 +37,11 @@ export function createHeadEdgeSliders(layer, options) {
     let pct = pctFromInput(input);
     if (axis === "pitch") pct = 100 - pct;
     rails[axis].visual.style.setProperty("--head-edge-pct", `${pct}%`);
-    input.setAttribute("aria-valuenow", String(Math.round(Number(input.value) / 100)));
+    const norm = Number(input.value) / 100;
+    input.setAttribute("aria-valuenow", String(Math.round(norm)));
+    const hint = formatAxisValue(axis, norm);
+    if (hint) input.setAttribute("aria-valuetext", hint);
+    else if (input.removeAttribute) input.removeAttribute("aria-valuetext");
   }
 
   function setInteracting(delta) {
@@ -167,6 +173,20 @@ export function createHeadEdgeSliders(layer, options) {
     refreshLabels() {
       rails.yaw.input.setAttribute("aria-label", axisLabel("yaw"));
       rails.pitch.input.setAttribute("aria-label", axisLabel("pitch"));
+    },
+    isInteracting() {
+      return interacting > 0;
+    },
+    setAtLimit(atLimit) {
+      if (!atLimit) return;
+      if (axes.yaw) {
+        rails.yaw.rail.classList.toggle("head-edge--at-min", Boolean(atLimit.yawMin));
+        rails.yaw.rail.classList.toggle("head-edge--at-max", Boolean(atLimit.yawMax));
+      }
+      if (axes.pitch) {
+        rails.pitch.rail.classList.toggle("head-edge--at-min", Boolean(atLimit.pitchMin));
+        rails.pitch.rail.classList.toggle("head-edge--at-max", Boolean(atLimit.pitchMax));
+      }
     },
     reveal,
     destroy() {

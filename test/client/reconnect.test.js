@@ -20,10 +20,11 @@ test("transient disconnects are transport failures, not explicit kicks", () => {
 test("invite rejoin is allowed only while the window is open", () => {
   const end = "2026-09-19T13:15:00.000Z";
   const now = Date.parse(end);
-  assert.equal(canRejoinInvite(false, end, now + 1), true);
+  assert.equal(canRejoinInvite(false, end, now + 1), false);
   assert.equal(canRejoinInvite(true, end, now - 1), true);
   assert.equal(canRejoinInvite(true, end, now + 1), false);
   assert.equal(canRejoinInvite(true, null, now), true);
+  assert.equal(endedOverlayState({ inviteBound: false }).rejoin, false);
 });
 
 test("ended overlay hides rejoin after expiry and during reconnect grace", () => {

@@ -6,7 +6,14 @@ import {
   lookKeyDelta,
   parseLookValue,
 } from "../protocol/look.js";
-import { headAxes, isHeadAvailable } from "../protocol/capabilities.js";
+import {
+  headAxisLimit,
+  headAxes,
+  headMapping,
+  headNormToDeg,
+  isHeadAvailable,
+} from "../protocol/capabilities.js";
+import { parseRobotStatus } from "../protocol/status.js";
 
 const SEND_MS = 80;
 const KEY_TICK_MS = 50;
@@ -31,6 +38,16 @@ export function createHeadFeature(els, t) {
 
   function axes() {
     return headAxes(caps);
+  }
+
+  function formatAxisValue(axis, norm) {
+    const limit = headAxisLimit(caps, axis);
+    if (!limit) return null;
+    const map = headMapping(caps);
+    const inverted = axis === "yaw" ? map.yawInverted : map.pitchInverted;
+    const deg = headNormToDeg(norm, limit, inverted);
+    if (deg == null || !Number.isFinite(deg)) return null;
+    return `${Math.round(deg)}°`;
   }
 
   function setHostHidden(hidden) {
@@ -73,6 +90,23 @@ export function createHeadFeature(els, t) {
     pose = parseLookValue(next);
     if (edgeSliders) edgeSliders.setPose(pose);
     if (send) scheduleSend();
+  }
+
+  function operatorControllingHead() {
+    if (held.size) return true;
+    if (edgeSliders?.isInteracting?.()) return true;
+    if (els.headLookLayer?.classList.contains("is-dragging")) return true;
+    return false;
+  }
+
+  function applyHeadStatus(head) {
+    if (!head || operatorControllingHead()) return;
+    const on = axes();
+    const next = { ...pose };
+    if (on.yaw && typeof head.yaw === "number") next.yaw = head.yaw;
+    if (on.pitch && typeof head.pitch === "number") next.pitch = head.pitch;
+    setPose(next, false);
+    if (edgeSliders && head.atLimit) edgeSliders.setAtLimit(head.atLimit);
   }
 
   function applyDelta(delta) {
@@ -179,6 +213,7 @@ export function createHeadFeature(els, t) {
       if (els.headLookLayer) {
         edgeSliders = createHeadEdgeSliders(els.headLookLayer, {
           t,
+          formatAxisValue,
           onAxis: (axis, value) => {
             setPose({ ...pose, [axis]: value }, true);
             markUsed();
@@ -237,6 +272,9 @@ export function createHeadFeature(els, t) {
         els.headLookLayer.title = t("head.hintKeyboard");
       }
       if (edgeSliders) edgeSliders.refreshLabels();
+    },
+    onStatus(payload) {
+      applyHeadStatus(parseRobotStatus(payload).head);
     },
   };
 }

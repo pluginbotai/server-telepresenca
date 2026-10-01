@@ -123,6 +123,7 @@ function mockDocument() {
             this.listeners[type] = fn;
           },
           setAttribute() {},
+          removeAttribute() {},
         };
       }
       const node = {

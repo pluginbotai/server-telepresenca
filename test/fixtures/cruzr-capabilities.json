@@ -70,6 +70,16 @@
   "head": {
     "available": true,
     "yaw": true,
-    "pitch": true
+    "pitch": true,
+    "rangeMode": "full",
+    "mapping": { "yawInverted": false, "pitchInverted": true },
+    "limits": {
+      "yaw": { "minDeg": 25, "maxDeg": 335, "windowDeg": 55 },
+      "pitch": { "minDeg": 180, "maxDeg": 270, "windowDeg": 40 }
+    }
+  },
+  "control": {
+    "lease": "single-operator",
+    "continuousLatestWins": ["head.look"]
   }
 }

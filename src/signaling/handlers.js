@@ -5,6 +5,7 @@ import {
   ROLE_OPERATOR,
   ROLE_ROBOT,
 } from "../protocol/events.js";
+import { sanitizeControlPayload } from "../protocol/control-sanitize.js";
 import { isExpired, parseExpiresAt } from "../rooms/expiry.js";
 import {
   clearExpiryTimer,
@@ -233,9 +234,12 @@ export function attachSignaling(io, { rooms, iceServers, log }) {
       const room = rooms.get(roomId);
       if (!room?.robot) return;
 
+      const sanitized = sanitizeControlPayload(payload);
+      if (!sanitized) return;
+
       io.to(room.robot).emit("control", {
-        action: payload.action,
-        value: payload.value,
+        action: sanitized.action,
+        value: sanitized.value,
         from: ROLE_OPERATOR,
       });
     });

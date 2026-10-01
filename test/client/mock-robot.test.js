@@ -4,6 +4,7 @@ import {
   getMockCapabilities,
   getMockStatus,
   isMockRequested,
+  isMockUiEnabled,
   resolveMockType,
   shouldShowMockToggle,
 } from "../../public/js/features/mock-robot.js";
@@ -46,17 +47,23 @@ test("getMockStatus provides initial telemetry for simulated robot", () => {
   assert.equal(statusCruzr.audio.volume, 8);
 });
 
+test("isMockUiEnabled allows localhost and explicit mock query", () => {
+  assert.equal(isMockUiEnabled("?room=x"), false);
+  assert.equal(isMockUiEnabled("?mock=cruzr"), true);
+  assert.equal(isMockUiEnabled("?demo=1"), true);
+});
+
 test("shouldShowMockToggle displays mock button only when no real robot is connected", () => {
-  // Offline / no robot -> show
-  assert.equal(shouldShowMockToggle(), true);
-  assert.equal(shouldShowMockToggle({ connected: false, liveCapabilities: null }), true);
-  assert.equal(shouldShowMockToggle({ connected: false, liveCapabilities: {} }), true);
+  const dev = { search: "?mock=cruzr" };
 
-  // Real robot connected -> hide
-  assert.equal(shouldShowMockToggle({ connected: true, liveCapabilities: null }), false);
-  assert.equal(shouldShowMockToggle({ connected: true, liveCapabilities: { locomotion: { available: true } } }), false);
+  // Sem robô na sala -> show (em dev; localhost idem no browser)
+  assert.equal(shouldShowMockToggle(dev), true);
 
-  // Robot capabilities present in room state even before WebRTC establishes -> hide
-  assert.equal(shouldShowMockToggle({ connected: false, liveCapabilities: { locomotion: { available: true } } }), false);
+  // Production hostname without mock param -> never show
+  assert.equal(shouldShowMockToggle({ search: "?room=sala" }), false);
+
+  // Robô real na sala ou WebRTC -> hide
+  assert.equal(shouldShowMockToggle({ ...dev, robotPeerPresent: true }), false);
+  assert.equal(shouldShowMockToggle({ ...dev, rtcWithRobot: true }), false);
 });
 

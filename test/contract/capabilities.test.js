@@ -10,6 +10,10 @@ import {
   isLocomotionSpeedAvailable,
   isPowerAvailable,
   isVolumeAvailable,
+  headAxisLimit,
+  headMapping,
+  headNormToDeg,
+  headRangeMode,
   locomotionSpeedRange,
   normalizeCapabilities,
   snapLocomotionSpeedFactor,
@@ -43,6 +47,18 @@ test("head look is opt-in like flashlight", () => {
   assert.equal(isHeadAvailable(cruzr), true);
   assert.equal(isHeadAvailable(flashlightRobot), false);
   assert.equal(isHeadAvailable({ head: { available: false } }), false);
+});
+
+test("head limits and range mode parse from capabilities", () => {
+  assert.equal(headRangeMode(cruzr), "full");
+  const pitch = headAxisLimit(cruzr, "pitch");
+  assert.ok(pitch);
+  assert.equal(pitch.minDeg, 180);
+  assert.equal(pitch.maxDeg, 270);
+  const map = headMapping(cruzr);
+  assert.equal(map.pitchInverted, true);
+  const deg = headNormToDeg(0, pitch, map.pitchInverted);
+  assert.ok(deg !== null && deg > 200 && deg < 240);
 });
 
 test("battery and volume HUD are opt-in", () => {
