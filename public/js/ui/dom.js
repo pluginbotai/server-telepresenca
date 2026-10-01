@@ -52,6 +52,18 @@ export function queryDom() {
     volumeHost: document.getElementById("volumeHost"),
     callBar: document.getElementById("callBar"),
     hudTooltip: document.getElementById("hudTooltip"),
+    btnToggleRobotDrawer: document.getElementById("btnToggleRobotDrawer"),
+    btnCloseRobotDrawer: document.getElementById("btnCloseRobotDrawer"),
+    robotDrawer: document.getElementById("robotDrawer"),
+    robotDrawerBackdrop: document.getElementById("robotDrawerBackdrop"),
+    robotDrawerBody: document.getElementById("robotDrawerBody"),
+    drawerFlashlightHost: document.getElementById("drawerFlashlightHost"),
+    drawerHeadHost: document.getElementById("drawerHeadHost"),
+    robotQuickDock: document.getElementById("robotQuickDock"),
+    btnQuickVolume: document.getElementById("btnQuickVolume"),
+    btnQuickHeadReset: document.getElementById("btnQuickHeadReset"),
+    btnQuickFlashlight: document.getElementById("btnQuickFlashlight"),
+    btnToggleMockRobot: document.getElementById("btnToggleMockRobot"),
   };
 }
 
@@ -66,5 +78,7 @@ export function hostById(id, els) {
   if (id === "head" || id === "head-look") return els.headLookLayer;
   if (id === "power") return els.powerHost;
   if (id === "volume") return els.volumeHost;
+  if (id === "flashlight") return els.drawerFlashlightHost || els.featureHost;
+  if (id === "head-drawer") return els.drawerHeadHost;
   return document.querySelector(`[data-host="${id}"]`);
 }
