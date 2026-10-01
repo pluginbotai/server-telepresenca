@@ -1,4 +1,5 @@
 import { createTeleJoystick } from "../joystick.js";
+import { blocksGameKeyboardShortcuts } from "../ui/game-keyboard.js";
 import {
   backwardPulseDistanceM,
   isContinuousBackward,
@@ -135,11 +136,12 @@ export function createLocomotionFeature(els, t) {
 
   function onKeyDown(event) {
     if (!ctx?.isConnected()) return;
-    const tag =
-      typeof document !== "undefined" && document.activeElement
-        ? document.activeElement.tagName.toLowerCase()
-        : "";
-    if (tag === "input" || tag === "textarea") return;
+    if (
+      typeof document !== "undefined" &&
+      blocksGameKeyboardShortcuts(document.activeElement)
+    ) {
+      return;
+    }
     if (event.repeat) return;
 
     const key = event.key?.toLowerCase();

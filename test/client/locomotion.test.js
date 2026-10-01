@@ -91,6 +91,30 @@ test("locomotion key rollover: pressing S while holding W switches to backward, 
   assert.equal(dispatched[dispatched.length - 1].action, "stop");
 });
 
+test("locomotion accepts WASD while a range slider holds focus", () => {
+  const prevDoc = globalThis.document;
+  globalThis.document = {
+    activeElement: {
+      tagName: "INPUT",
+      getAttribute(name) {
+        return name === "type" ? "range" : null;
+      },
+      isContentEditable: false,
+    },
+  };
+
+  const mockCtx = {
+    isConnected: () => true,
+    sendControl: () => {},
+  };
+  const feature = createLocomotionFeature({}, (k) => k);
+  feature.mount(mockCtx);
+  feature.onKeyDown({ key: "w", preventDefault: () => {} });
+  assert.equal(feature.getActiveMovement(), "forward");
+  feature.onKeyUp({ key: "w", preventDefault: () => {} });
+  globalThis.document = prevDoc;
+});
+
 test("locomotion pulse backward stops forward heartbeat when robot lacks continuous backward", () => {
   const dispatched = [];
 

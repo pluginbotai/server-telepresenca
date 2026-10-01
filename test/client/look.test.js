@@ -8,7 +8,11 @@ import {
   lookKeyDelta,
   parseLookValue,
 } from "../../public/js/protocol/look.js";
-import { createHeadEdgeSliders } from "../../public/js/head-edge-sliders.js";
+import {
+  createHeadEdgeSliders,
+  pitchNormFromTrackY,
+  pitchVisualPctFromNorm,
+} from "../../public/js/head-edge-sliders.js";
 import { createHeadLookSurface } from "../../public/js/head-look.js";
 import { createHeadFeature } from "../../public/js/features/head.js";
 import { headAxes, isHeadAvailable } from "../../public/js/protocol/capabilities.js";
@@ -133,11 +137,19 @@ function mockDocument() {
         innerHTML: "",
         style: { setProperty() {} },
         children: [],
+        listeners: {},
         setAttribute() {},
+        addEventListener(type, fn) {
+          this.listeners[type] = fn;
+        },
+        getBoundingClientRect() {
+          return { top: 0, height: 200, width: 28, left: 0 };
+        },
         append(...kids) {
           this.children.push(...kids);
           for (const kid of kids) {
             if (kid.className === "head-edge-input") this.input = kid;
+            if (kid.className === "head-edge-slider-visual") this.visual = kid;
           }
         },
         remove() {},
@@ -158,6 +170,13 @@ test("head edge sliders hide yaw when axis unavailable", () => {
   globalThis.document = prevDoc;
 });
 
+test("pitch track maps pointer Y to norm and thumb position", () => {
+  const rect = { top: 100, height: 200 };
+  assert.equal(pitchNormFromTrackY(100, rect), 1);
+  assert.equal(pitchNormFromTrackY(300, rect), -1);
+  assert.equal(pitchVisualPctFromNorm(0), 50);
+});
+
 test("head edge sliders report normalized axis values", () => {
   const prevDoc = globalThis.document;
   globalThis.document = mockDocument();
@@ -171,8 +190,52 @@ test("head edge sliders report normalized axis values", () => {
   yawRail.input.value = "40";
   yawRail.input.listeners.input();
   assert.deepEqual(calls[0], { axis: "yaw", value: 0.4 });
+  const pitchRail = layer.edgeRails.pitch;
+  pitchRail.input.value = "40";
+  pitchRail.input.listeners.input();
+  assert.deepEqual(calls[1], { axis: "pitch", value: 0.4 });
   ui.destroy();
   globalThis.document = prevDoc;
+});
+
+test("head edge sliders release interaction and blur after pointerup", async () => {
+  const prevDoc = globalThis.document;
+  const prevWindow = globalThis.window;
+  const windowListeners = {};
+  globalThis.document = mockDocument();
+  globalThis.window = {
+    addEventListener(type, fn, capture) {
+      windowListeners[`${type}:${capture ? "capture" : "bubble"}`] = fn;
+    },
+    removeEventListener(type, fn, capture) {
+      const key = `${type}:${capture ? "capture" : "bubble"}`;
+      if (windowListeners[key] === fn) delete windowListeners[key];
+    },
+  };
+  const layer = mockLayer();
+  let blurred = false;
+  const ui = createHeadEdgeSliders(layer, { onAxis: () => {} });
+  const pitchRail = layer.edgeRails.pitch;
+  const input = pitchRail.input;
+  input.blur = () => {
+    blurred = true;
+  };
+  assert.equal(ui.isInteracting(), false);
+  pitchRail.listeners?.pointerdown?.({
+    pointerId: 7,
+    button: 0,
+    clientY: 120,
+    stopPropagation() {},
+    preventDefault() {},
+  });
+  assert.equal(ui.isInteracting(), true);
+  windowListeners["pointerup:capture"]?.({ pointerId: 7 });
+  assert.equal(ui.isInteracting(), false);
+  await new Promise((resolve) => queueMicrotask(resolve));
+  assert.equal(blurred, true);
+  ui.destroy();
+  globalThis.document = prevDoc;
+  globalThis.window = prevWindow;
 });
 
 test("head-look surface ignores pointerdown on edge rails", () => {

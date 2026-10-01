@@ -15,7 +15,7 @@ export function isTransientDisconnect(reason) {
  * @param {number} [now]
  */
 export function canRejoinInvite(inviteBound, expiresAt, now = Date.now()) {
-  if (!inviteBound) return true;
+  if (!inviteBound) return false;
   if (expiresAt == null || expiresAt === "") return true;
   const end = Date.parse(String(expiresAt));
   if (!Number.isFinite(end)) return true;

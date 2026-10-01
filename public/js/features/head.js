@@ -13,7 +13,9 @@ import {
   headNormToDeg,
   isHeadAvailable,
 } from "../protocol/capabilities.js";
+import { shouldApplyHeadTelemetry } from "../protocol/head-telemetry.js";
 import { parseRobotStatus } from "../protocol/status.js";
+import { blocksGameKeyboardShortcuts } from "../ui/game-keyboard.js";
 
 const SEND_MS = 80;
 const KEY_TICK_MS = 50;
@@ -35,6 +37,11 @@ export function createHeadFeature(els, t) {
   let sendTimer = null;
   let pending = false;
   let reducedMotion = false;
+  let lastHeadInputAt = 0;
+
+  function markHeadInput() {
+    lastHeadInputAt = Date.now();
+  }
 
   function axes() {
     return headAxes(caps);
@@ -86,10 +93,20 @@ export function createHeadFeature(els, t) {
     }, SEND_MS);
   }
 
-  function setPose(next, send) {
+  function setPose(next, send, opts = {}) {
     pose = parseLookValue(next);
     if (edgeSliders) edgeSliders.setPose(pose);
-    if (send) scheduleSend();
+    if (!send) return;
+    if (opts.immediate) {
+      if (sendTimer) {
+        clearTimeout(sendTimer);
+        sendTimer = null;
+      }
+      pending = true;
+      flushLook(true);
+      return;
+    }
+    scheduleSend();
   }
 
   function operatorControllingHead() {
@@ -101,6 +118,16 @@ export function createHeadFeature(els, t) {
 
   function applyHeadStatus(head) {
     if (!head || operatorControllingHead()) return;
+    if (
+      !shouldApplyHeadTelemetry({
+        pose,
+        head,
+        lastInputAt: lastHeadInputAt,
+      })
+    ) {
+      if (edgeSliders && head.atLimit) edgeSliders.setAtLimit(head.atLimit);
+      return;
+    }
     const on = axes();
     const next = { ...pose };
     if (on.yaw && typeof head.yaw === "number") next.yaw = head.yaw;
@@ -110,7 +137,8 @@ export function createHeadFeature(els, t) {
   }
 
   function applyDelta(delta) {
-    setPose(addLook(pose, delta, axes()), true);
+    markHeadInput();
+    setPose(addLook(pose, delta, axes()), true, { immediate: held.size > 0 });
     markUsed();
   }
 
@@ -152,10 +180,7 @@ export function createHeadFeature(els, t) {
   }
 
   function typingTarget() {
-    const tag = document.activeElement
-      ? document.activeElement.tagName.toLowerCase()
-      : "";
-    return tag === "input" || tag === "textarea";
+    return blocksGameKeyboardShortcuts(document.activeElement);
   }
 
   function onKeyDown(event) {
@@ -215,6 +240,7 @@ export function createHeadFeature(els, t) {
           t,
           formatAxisValue,
           onAxis: (axis, value) => {
+            markHeadInput();
             setPose({ ...pose, [axis]: value }, true);
             markUsed();
           },

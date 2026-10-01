@@ -6,6 +6,27 @@
  * @param {(axis: "yaw" | "pitch", norm: number) => string | null} [options.formatAxisValue]
  * @param {(key: string) => string} [options.t]
  */
+
+/**
+ * Map pointer Y on the vertical track to normalized pitch (+1 top, -1 bottom).
+ * @param {number} clientY
+ * @param {{ top: number, height: number }} rect
+ */
+export function pitchNormFromTrackY(clientY, rect) {
+  const h = Math.max(rect.height, 1);
+  const t = (clientY - rect.top) / h;
+  const clamped = Math.max(0, Math.min(1, t));
+  return clampUnit(1 - clamped * 2);
+}
+
+/**
+ * @param {number} norm
+ */
+export function pitchVisualPctFromNorm(norm) {
+  const n = clampUnit(norm);
+  return 100 - ((n * 100 + 100) / 200) * 100;
+}
+
 export function createHeadEdgeSliders(layer, options) {
   const onAxis = options.onAxis || (() => {});
   const formatAxisValue = options.formatAxisValue || (() => null);
@@ -15,9 +36,11 @@ export function createHeadEdgeSliders(layer, options) {
   let axes = { yaw: true, pitch: true };
   let enabled = true;
   let idleTimer = null;
-  let interacting = 0;
+  let pointerDragging = false;
   /** @type {Record<string, { rail: HTMLElement, input: HTMLInputElement, visual: HTMLElement }>} */
   const rails = {};
+  /** @type {Array<() => void>} */
+  const releasePointerDrags = [];
 
   function axisLabel(axis) {
     return axis === "yaw" ? t("head.yawAria") : t("head.pitchAria");
@@ -33,21 +56,37 @@ export function createHeadEdgeSliders(layer, options) {
     return valueToPct(n);
   }
 
+  function normFromInput(input) {
+    return clampUnit(Number(input.value) / 100);
+  }
+
+  function setThumbPct(axis, pct) {
+    const pctStr = `${pct}%`;
+    rails[axis].rail.style.setProperty("--head-edge-pct", pctStr);
+    rails[axis].visual.style.setProperty("--head-edge-pct", pctStr);
+  }
+
   function syncVisual(axis, input) {
-    let pct = pctFromInput(input);
-    if (axis === "pitch") pct = 100 - pct;
-    rails[axis].visual.style.setProperty("--head-edge-pct", `${pct}%`);
-    const norm = Number(input.value) / 100;
+    const norm = normFromInput(input);
+    const pct =
+      axis === "pitch" ? pitchVisualPctFromNorm(norm) : pctFromInput(input);
+    setThumbPct(axis, pct);
     input.setAttribute("aria-valuenow", String(Math.round(norm)));
     const hint = formatAxisValue(axis, norm);
     if (hint) input.setAttribute("aria-valuetext", hint);
     else if (input.removeAttribute) input.removeAttribute("aria-valuetext");
   }
 
-  function setInteracting(delta) {
-    interacting = Math.max(0, interacting + delta);
-    layer.classList.toggle("head-edge--interacting", interacting > 0);
-    if (delta > 0) reveal();
+  function emitAxis(axis, norm) {
+    syncVisual(axis, rails[axis].input);
+    onAxis(axis, norm);
+    reveal();
+  }
+
+  function setPointerDragging(active) {
+    pointerDragging = Boolean(active);
+    layer.classList.toggle("head-edge--interacting", pointerDragging);
+    if (pointerDragging) reveal();
     else scheduleIdle();
   }
 
@@ -58,10 +97,10 @@ export function createHeadEdgeSliders(layer, options) {
 
   function scheduleIdle() {
     if (idleTimer) clearTimeout(idleTimer);
-    if (interacting > 0) return;
+    if (pointerDragging) return;
     idleTimer = setTimeout(() => {
       idleTimer = null;
-      if (interacting === 0) layer.classList.remove("head-edge--revealed");
+      if (!pointerDragging) layer.classList.remove("head-edge--revealed");
     }, IDLE_MS);
   }
 
@@ -98,21 +137,70 @@ export function createHeadEdgeSliders(layer, options) {
     input.setAttribute("aria-valuemax", "1");
     input.setAttribute("aria-valuenow", "0");
 
-    input.addEventListener("pointerdown", (event) => {
+    /** @type {((event: PointerEvent) => void) | null} */
+    let endPointerDrag = null;
+    /** @type {((event: PointerEvent) => void) | null} */
+    let movePointerDrag = null;
+
+    function clearPointerDragListeners() {
+      if (endPointerDrag) {
+        window.removeEventListener("pointerup", endPointerDrag, true);
+        window.removeEventListener("pointercancel", endPointerDrag, true);
+        endPointerDrag = null;
+      }
+      if (movePointerDrag) {
+        window.removeEventListener("pointermove", movePointerDrag, true);
+        movePointerDrag = null;
+      }
+    }
+
+    function finishPointerDrag() {
+      clearPointerDragListeners();
+      setPointerDragging(false);
+      queueMicrotask(() => {
+        if (typeof input.blur === "function") input.blur();
+      });
+    }
+
+    function applyPitchFromPointer(clientY) {
+      const rect = visual.getBoundingClientRect();
+      const norm = pitchNormFromTrackY(clientY, rect);
+      input.value = String(Math.round(norm * 100));
+      emitAxis("pitch", norm);
+    }
+
+    function beginPointerDrag(event) {
+      if (!enabled || event.button !== 0) return;
       event.stopPropagation();
-      setInteracting(1);
-    });
-    input.addEventListener("pointerup", () => setInteracting(-1));
-    input.addEventListener("pointercancel", () => setInteracting(-1));
-    input.addEventListener("focus", () => {
-      setInteracting(1);
-      reveal();
-    });
-    input.addEventListener("blur", () => setInteracting(-1));
+      event.preventDefault();
+      for (const release of releasePointerDrags) release();
+      setPointerDragging(true);
+      if (axis === "pitch") {
+        applyPitchFromPointer(event.clientY);
+        movePointerDrag = (moveEvent) => {
+          if (moveEvent.pointerId !== event.pointerId) return;
+          applyPitchFromPointer(moveEvent.clientY);
+        };
+        window.addEventListener("pointermove", movePointerDrag, true);
+      }
+      endPointerDrag = (upEvent) => {
+        if (upEvent.pointerId !== event.pointerId) return;
+        finishPointerDrag();
+      };
+      window.addEventListener("pointerup", endPointerDrag, true);
+      window.addEventListener("pointercancel", endPointerDrag, true);
+    }
+
+    releasePointerDrags.push(clearPointerDragListeners);
+
+    if (axis === "pitch") {
+      rail.addEventListener("pointerdown", beginPointerDrag);
+    } else {
+      input.addEventListener("pointerdown", beginPointerDrag);
+    }
+    input.addEventListener("focus", () => reveal());
     input.addEventListener("input", () => {
-      syncVisual(axis, input);
-      onAxis(axis, Number(input.value) / 100);
-      reveal();
+      emitAxis(axis, normFromInput(input));
     });
 
     rail.append(visual, input);
@@ -164,7 +252,7 @@ export function createHeadEdgeSliders(layer, options) {
       }
       layer.classList.toggle("head-edge--disabled", !enabled);
       if (!enabled) {
-        interacting = 0;
+        pointerDragging = false;
         layer.classList.remove("head-edge--interacting", "head-edge--revealed");
         if (idleTimer) clearTimeout(idleTimer);
         idleTimer = null;
@@ -175,7 +263,7 @@ export function createHeadEdgeSliders(layer, options) {
       rails.pitch.input.setAttribute("aria-label", axisLabel("pitch"));
     },
     isInteracting() {
-      return interacting > 0;
+      return pointerDragging;
     },
     setAtLimit(atLimit) {
       if (!atLimit) return;
@@ -190,6 +278,9 @@ export function createHeadEdgeSliders(layer, options) {
     },
     reveal,
     destroy() {
+      for (const release of releasePointerDrags) release();
+      releasePointerDrags.length = 0;
+      pointerDragging = false;
       layer.removeEventListener("pointermove", onLayerMove);
       if (idleTimer) clearTimeout(idleTimer);
       yawRail.remove();

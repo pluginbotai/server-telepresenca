@@ -32,7 +32,6 @@ import {
 } from "./invite/reconnect.js";
 import {
   canReturnToPlatform,
-  returnToPreviousOrUrl,
   startRedirectCountdown,
 } from "./invite/redirect.js";
 import { bindLangSwitch } from "./ui/lang-switch.js";

@@ -233,6 +233,7 @@
   opacity: 0;
   cursor: grab;
   z-index: 2;
+  touch-action: none;
 }
 
 .head-edge-rail--horizontal .head-edge-input {
