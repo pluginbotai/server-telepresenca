@@ -46,7 +46,6 @@ import {
 import { createStatus } from "./ui/status.js";
 import { initTooltips } from "./ui/tooltip.js";
 import { fetchIceServers } from "./webrtc/ice.js";
-import { liveStatusKey, liveStatusMode } from "./webrtc/ice-path.js";
 import { createPeerController } from "./webrtc/peer.js";
 import { applyOutgoingVideoQuality } from "./webrtc/quality.js";
 
@@ -147,9 +146,6 @@ export function createOperator({
     onUseMetered() {
       meteredAllowed = true;
     },
-    onIcePath(kind) {
-      status.setStatus(liveStatusKey(kind), liveStatusMode(kind));
-    },
     getSocket: () => signaling.getSocket(),
     getLocalStream: () => media.getLocalStream(),
     ensureMedia: () => media.ensureMedia(),
@@ -165,6 +161,11 @@ export function createOperator({
             console.warn(err),
           );
         }
+      }
+    },
+    onControlChannelOpen() {
+      if (connected || isMockActive) {
+        registry.setEnabled(true);
       }
     },
   });
@@ -315,6 +316,7 @@ export function createOperator({
     locomotion.setEnabled(canControl);
     head.setEnabled(canControl);
     volume.setEnabled(canControl);
+    registry.setEnabled(canControl);
     robotDrawer.setEnabled(canControl);
     if (els.btnQuickVolume) els.btnQuickVolume.disabled = !canControl;
     if (els.btnQuickHeadReset) els.btnQuickHeadReset.disabled = !canControl;

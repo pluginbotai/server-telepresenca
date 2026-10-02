@@ -168,11 +168,6 @@
   flex: none;
 }
 
-.status-chip.live-turn::before {
-  background: #f0c14a;
-  box-shadow: 0 0 0 3px rgba(240, 193, 74, 0.18);
-}
-
 .lang-switch {
   position: relative;
 }

@@ -152,14 +152,6 @@
   gap: 10px;
 }
 
-.robot-drawer-title-icon {
-  width: 20px;
-  height: 20px;
-  color: var(--accent);
-  flex: none;
-  opacity: 0.95;
-}
-
 .robot-drawer-title {
   margin: 0;
   font-size: 0.94rem;

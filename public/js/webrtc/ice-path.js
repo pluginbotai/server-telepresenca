@@ -102,21 +102,15 @@ export function mediaPathKind(pair) {
 
 /**
  * @param {"udp" | "turn" | null} kind
- * @returns {string}
  */
-export function liveStatusKey(kind) {
-  if (kind === "turn") return "status.liveTurn";
-  if (kind === "udp") return "status.liveUdp";
-  return "status.live";
-}
-
-/**
- * @param {"udp" | "turn" | null} kind
- * @returns {string}
- */
-export function liveStatusMode(kind) {
-  if (kind === "turn") return "live live-turn";
-  return "live";
+function logMediaPathKind(kind) {
+  if (kind === "turn") {
+    console.info("[telepresença] Conexão de mídia: TURN");
+    return;
+  }
+  if (kind === "udp") {
+    console.info("[telepresença] Conexão de mídia: UDP (caminho direto)");
+  }
 }
 
 /**
@@ -163,7 +157,9 @@ export async function reportSelectedIcePath(pc) {
     );
     return null;
   }
+  const kind = mediaPathKind(pair);
+  logMediaPathKind(kind);
   if (entry.level === "warn") console.warn(entry.message);
   else console.info(entry.message);
-  return mediaPathKind(pair);
+  return kind;
 }

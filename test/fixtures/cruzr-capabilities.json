@@ -4,7 +4,7 @@
     "rearObstacleSensor": false,
     "frontObstacleSensor": true,
     "turnSignInverted": true,
-    "backwardPulseDistanceM": 0.2,
+    "backwardPulseDistanceM": 0.3,
     "backwardPulseCooldownMs": 400,
     "speed": true,
     "speedMin": 0.35,

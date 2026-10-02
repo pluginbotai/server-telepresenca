@@ -19,13 +19,13 @@ export function createPeerController({
   getIceServers,
   getFallbackIceServers,
   onUseMetered,
-  onIcePath,
   getSocket,
   getLocalStream,
   ensureMedia,
   setRtcState,
   setStatus,
   onRemoteVideo,
+  onControlChannelOpen,
 }) {
   let pc = null;
   let makingOffer = false;
@@ -162,6 +162,9 @@ export function createPeerController({
       controlChannel.bufferedAmountLowThreshold = 65536;
       controlChannel.onopen = () => {
         console.log("[DataChannel] Canal 'control' conectado (P2P pronto)");
+        if (typeof onControlChannelOpen === "function") {
+          onControlChannelOpen();
+        }
       };
       controlChannel.onclose = () => {
         console.log("[DataChannel] Canal 'control' desconectado");
@@ -226,11 +229,9 @@ export function createPeerController({
         setStatus("status.webrtcUnstable", "online");
       }
       if (pc.connectionState === "connected") {
-        reportSelectedIcePath(pc)
-          .then((kind) => {
-            if (kind && typeof onIcePath === "function") onIcePath(kind);
-          })
-          .catch((err) => console.warn("Falha ao ler caminho ICE", err));
+        reportSelectedIcePath(pc).catch((err) =>
+          console.warn("Falha ao ler caminho ICE", err),
+        );
         setStatus("status.live", "live");
         if (hasRenderableRemoteVideo(els.remoteVideo)) {
           clearOfferRetry();
