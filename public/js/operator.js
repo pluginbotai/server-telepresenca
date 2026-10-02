@@ -6,6 +6,7 @@ import { createLocomotionSpeedFeature } from "./features/locomotion-speed.js";
 import { createPowerFeature } from "./features/power.js";
 import { createFeatureRegistry } from "./features/registry.js";
 import { createVideoQualityFeature, savePresetId } from "./features/video-quality.js";
+import { routeControl } from "./signaling/control-route.js";
 import { createVolumeFeature } from "./features/volume.js";
 import { createMediaController } from "./media/local.js";
 import { createLocalPreviewController } from "./media/local-preview.js";
@@ -214,10 +215,13 @@ export function createOperator({
           return;
         }
         if (!connected) return;
-        const sentViaP2P = peer.sendDataChannelControl(action, value);
-        if (!sentViaP2P) {
-          signaling.sendControl(action, value, opts);
-        }
+        routeControl({
+          action,
+          value,
+          opts,
+          sendP2P: (a, v) => peer.sendDataChannelControl(a, v),
+          sendSocket: (a, v, o) => signaling.sendControl(a, v, o),
+        });
       },
       sendVideoQuality: (presetId) => {
         if (!connected) return;
