@@ -71,10 +71,7 @@ test("isRobotDrawerAvailable returns true only when robot has drawer capabilitie
   assert.equal(isRobotDrawerAvailable({}), false);
   assert.equal(isRobotDrawerAvailable({ locomotion: { available: true } }), false);
 
-  assert.equal(
-    isRobotDrawerAvailable({ locomotion: { speed: true } }),
-    true,
-  );
+  assert.equal(isRobotDrawerAvailable({ locomotion: { speed: true } }), true);
   assert.equal(isRobotDrawerAvailable({ audio: { volume: true } }), true);
   assert.equal(isRobotDrawerAvailable({ flashlight: { available: true } }), true);
   assert.equal(isRobotDrawerAvailable({ head: { available: true } }), true);
@@ -188,7 +185,7 @@ test("createRobotDrawer setEnabled closes drawer and disables toggle button", ()
   assert.equal(toggleBtn.disabled, false);
 });
 
-test("createRobotDrawer wires quick volume shortcut and quick dock integration", () => {
+test("createRobotDrawer does not open drawer on quick volume click (quick volume is independent)", () => {
   const drawerEl = createMockElement();
   const toggleBtn = createMockElement();
   const closeBtn = createMockElement();
@@ -207,8 +204,8 @@ test("createRobotDrawer wires quick volume shortcut and quick dock integration",
 
   assert.equal(drawer.isOpen(), false);
   btnQuickVolume.dispatchEvent("click");
-  assert.equal(drawer.isOpen(), true);
-  assert.equal(drawerEl.classList.contains("is-open"), true);
+  assert.equal(drawer.isOpen(), false, "quick volume action must not open drawer");
+  assert.equal(drawerEl.classList.contains("is-open"), false);
 });
 
 test("createRobotDrawer synchronizes aria on quick dock (HUD tooltip, not native title)", () => {
@@ -266,7 +263,9 @@ test("createRobotDrawer safely handles getIsMockActive callback throwing an erro
     closeBtn,
     btnMockToggle,
     getIsMockActive: () => {
-      throw new ReferenceError("can't access lexical declaration before initialization");
+      throw new ReferenceError(
+        "can't access lexical declaration before initialization",
+      );
     },
     t,
   });
@@ -299,7 +298,3 @@ test("createRobotDrawer toggles panel-icon-arrow d attribute between open and cl
   drawer.close();
   assert.equal(arrowEl.getAttribute("d"), "m10 15-3-3 3-3");
 });
-
-
-
-

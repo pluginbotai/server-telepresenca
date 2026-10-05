@@ -1,3 +1,4 @@
+/* eslint-disable n/no-unsupported-features/node-builtins */
 import assert from "node:assert/strict";
 import { test } from "../helpers/test.js";
 import { createLocomotionSpeedFeature } from "../../public/js/features/locomotion-speed.js";
@@ -53,12 +54,12 @@ function fakeElement() {
 
 function installDom() {
   const prevDoc = globalThis.document;
-  const prevLs = globalThis.localStorage;
+  const prevLs = globalThis["localStorage"];
   const store = new Map();
   globalThis.document = {
     createElement: (tag) => Object.assign(fakeElement(), { tagName: tag }),
   };
-  globalThis.localStorage = {
+  globalThis["localStorage"] = {
     getItem: (k) => (store.has(k) ? store.get(k) : null),
     setItem: (k, v) => store.set(k, String(v)),
   };
@@ -66,7 +67,7 @@ function installDom() {
     store,
     restore() {
       globalThis.document = prevDoc;
-      globalThis.localStorage = prevLs;
+      globalThis["localStorage"] = prevLs;
     },
   };
 }
@@ -87,8 +88,12 @@ function mountFeature(caps, { connected = true } = {}) {
   return { feature, sent, group, ctx };
 }
 
-const TEMI = { locomotion: { speed: true, speedMin: 0.35, speedMax: 1, speedDefault: 0.75 } };
-const CRUZR = { locomotion: { speed: true, speedMin: 0.35, speedMax: 1, speedDefault: 1 } };
+const TEMI = {
+  locomotion: { speed: true, speedMin: 0.35, speedMax: 1, speedDefault: 0.75 },
+};
+const CRUZR = {
+  locomotion: { speed: true, speedMin: 0.35, speedMax: 1, speedDefault: 1 },
+};
 
 test("speed feature renders slow/normal/fast and sends the robot default on mount", () => {
   const dom = installDom();
@@ -99,7 +104,11 @@ test("speed feature renders slow/normal/fast and sends the robot default on moun
       ["0.35", "0.75", "1"],
     );
     assert.deepEqual(sent, [
-      { action: "locomotion.speed.set", value: { factor: 0.75 }, opts: { volatile: false } },
+      {
+        action: "locomotion.speed.set",
+        value: { factor: 0.75 },
+        opts: { volatile: false },
+      },
     ]);
   } finally {
     dom.restore();
@@ -113,7 +122,11 @@ test("clicking a step sends a non-volatile factor and persists it", () => {
     sent.length = 0;
     group.children[0].click();
     assert.deepEqual(sent, [
-      { action: "locomotion.speed.set", value: { factor: 0.35 }, opts: { volatile: false } },
+      {
+        action: "locomotion.speed.set",
+        value: { factor: 0.35 },
+        opts: { volatile: false },
+      },
     ]);
     assert.equal(dom.store.get("telepresenca.locomotion.speedFactor"), "0.35");
     group.children[2].click();

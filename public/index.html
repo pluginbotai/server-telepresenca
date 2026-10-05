@@ -248,10 +248,25 @@
             class="quick-dock-btn"
             data-i18n-aria="volume.panel"
             aria-label="Volume do robô"
+            hidden
           >
-            <svg class="quick-dock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M4.5 9.5h3.2L12 6.2v11.6L7.7 14.5H4.5V9.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-              <path d="M15.2 9.2a4.2 4.2 0 0 1 0 5.6M17.6 7a7.2 7.2 0 0 1 0 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <svg
+              class="quick-dock-icon"
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"
+              />
+              <path d="M16 9a5 5 0 0 1 0 6" />
+              <path d="M19.364 18.364a9 9 0 0 0 0-12.728" />
             </svg>
           </button>
           <button
@@ -262,9 +277,26 @@
             aria-label="Centralizar câmera"
             hidden
           >
-            <svg class="quick-dock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M3 3v5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              class="quick-dock-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M3 3v5h5"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
           <button
@@ -275,15 +307,32 @@
             aria-label="Lanterna"
             hidden
           >
-            <svg class="quick-dock-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg
+              class="quick-dock-icon"
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
               <path d="M12 13v1" />
-              <path d="M17 2a1 1 0 0 1 1 1v4a3 3 0 0 1-.6 1.8l-.6.8A4 4 0 0 0 16 12v8a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-8a4 4 0 0 0-.8-2.4l-.6-.8A3 3 0 0 1 6 7V3a1 1 0 0 1 1-1z" />
+              <path
+                d="M17 2a1 1 0 0 1 1 1v4a3 3 0 0 1-.6 1.8l-.6.8A4 4 0 0 0 16 12v8a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-8a4 4 0 0 0-.8-2.4l-.6-.8A3 3 0 0 1 6 7V3a1 1 0 0 1 1-1z"
+              />
               <path d="M6 6h12" />
             </svg>
           </button>
         </nav>
 
-        <div id="robotDrawerBackdrop" class="robot-drawer-backdrop" aria-hidden="true"></div>
+        <div
+          id="robotDrawerBackdrop"
+          class="robot-drawer-backdrop"
+          aria-hidden="true"
+        ></div>
 
         <aside
           id="robotDrawer"
@@ -295,7 +344,9 @@
           <div class="robot-drawer-drag-handle" aria-hidden="true"></div>
           <div class="robot-drawer-head">
             <div class="robot-drawer-title-wrap">
-              <h2 class="robot-drawer-title" data-i18n="media.robotControls">Controles do robô</h2>
+              <h2 class="robot-drawer-title" data-i18n="media.robotControls">
+                Controles do robô
+              </h2>
             </div>
             <div class="robot-drawer-actions">
               <button
@@ -308,8 +359,20 @@
                 aria-label="Simular robô conectado"
                 hidden
               >
-                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2" />
+                <svg
+                  viewBox="0 0 24 24"
+                  width="17"
+                  height="17"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"
+                  />
                   <path d="M6.453 15h11.094" />
                   <path d="M8.5 2h7" />
                 </svg>
@@ -323,8 +386,20 @@
                 title="Recolher controles"
                 aria-label="Recolher controles"
               >
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
-                  <path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <svg
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M9 5l7 7-7 7"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
                 </svg>
               </button>
             </div>

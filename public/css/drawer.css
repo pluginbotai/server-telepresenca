@@ -76,9 +76,21 @@
   box-shadow: 0 0 10px rgba(43, 176, 166, 0.35);
 }
 
-.quick-dock-btn .quick-dock-icon {
+.quick-dock-btn .quick-dock-icon,
+.quick-dock-btn svg {
   width: 20px;
   height: 20px;
+}
+
+.quick-dock-btn[aria-pressed="true"] {
+  background: rgba(229, 57, 53, 0.2);
+  border-color: rgba(229, 57, 53, 0.45);
+  color: #ff8a80;
+}
+
+.quick-dock-btn[aria-pressed="true"]:hover {
+  background: rgba(229, 57, 53, 0.32);
+  border-color: rgba(229, 57, 53, 0.7);
 }
 
 /* Backdrop */

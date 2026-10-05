@@ -6,14 +6,16 @@ import {
   createDrawerSectionInner,
 } from "../ui/robot-drawer-section.js";
 
-const ICON = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <path d="M4.5 9.5h3.2L12 6.2v11.6L7.7 14.5H4.5V9.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-  <path d="M15.2 9.2a4.2 4.2 0 0 1 0 5.6M17.6 7a7.2 7.2 0 0 1 0 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+const ICON = `<svg class="quick-dock-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/>
+  <path d="M16 9a5 5 0 0 1 0 6"/>
+  <path d="M19.364 18.364a9 9 0 0 0 0-12.728"/>
 </svg>`;
 
-const ICON_MUTED = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <path d="M4.5 9.5h3.2L12 6.2v11.6L7.7 14.5H4.5V9.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-  <path d="M16 9l6 6M22 9l-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+const ICON_MUTED = `<svg class="quick-dock-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/>
+  <line x1="22" x2="16" y1="9" y2="15"/>
+  <line x1="16" x2="22" y1="9" y2="15"/>
 </svg>`;
 
 /**
@@ -34,8 +36,10 @@ export function createVolumeFeature(els, t) {
   let min = 0;
   let max = 10;
   let level = 5;
+  let lastNonZero = 5;
   let sendTimer = null;
   let isDrawerMode = false;
+  const quickVolumeBtn = els?.btnQuickVolume;
 
   function label() {
     return t("volume.level", { level });
@@ -76,6 +80,15 @@ export function createVolumeFeature(els, t) {
       }
       button.disabled = !ctx?.isConnected();
     }
+    if (quickVolumeBtn) {
+      const isMuted = level <= min;
+      const muteKey = isMuted ? "volume.unmute" : "volume.mute";
+      quickVolumeBtn.setAttribute("aria-label", t(muteKey));
+      quickVolumeBtn.setAttribute("aria-pressed", isMuted ? "true" : "false");
+      quickVolumeBtn.title = t(muteKey);
+      quickVolumeBtn.innerHTML = isMuted ? ICON_MUTED : ICON;
+      quickVolumeBtn.disabled = !ctx?.isConnected();
+    }
     if (titleEl) titleEl.textContent = t("volume.panel");
     if (closeBtn) closeBtn.setAttribute("aria-label", t("dialog.close"));
     if (panel) panel.setAttribute("aria-label", t("volume.panel"));
@@ -92,7 +105,24 @@ export function createVolumeFeature(els, t) {
       max,
       min,
     );
+    if (level > min) {
+      lastNonZero = level;
+    } else if (!lastNonZero || lastNonZero <= min) {
+      lastNonZero = max;
+    }
   }
+
+  const onToggleMute = (event) => {
+    event?.preventDefault?.();
+    if (!ctx?.isConnected()) return;
+    if (level > min) {
+      lastNonZero = level;
+      setLevel(min, true);
+    } else {
+      setLevel(lastNonZero || max, true);
+    }
+    sendLevel(false);
+  };
 
   function sendLevel(volatile) {
     if (!ctx?.isConnected()) return;
@@ -126,8 +156,19 @@ export function createVolumeFeature(els, t) {
     mount(nextCtx) {
       ctx = nextCtx;
       applyRangeFromCaps(nextCtx.caps);
-      const host = nextCtx.host("volume") || els.volumeHost;
-      if (!host) return () => {};
+      if (quickVolumeBtn) {
+        quickVolumeBtn.addEventListener("click", onToggleMute);
+      }
+      const host = nextCtx.host("volume") || els?.volumeHost;
+      if (!host) {
+        syncUi();
+        return () => {
+          if (sendTimer) clearTimeout(sendTimer);
+          sendTimer = null;
+          quickVolumeBtn?.removeEventListener("click", onToggleMute);
+          ctx = null;
+        };
+      }
       host.hidden = false;
 
       isDrawerMode = host.classList.contains("robot-drawer-section");
@@ -155,36 +196,27 @@ export function createVolumeFeature(els, t) {
         sliderWrap.append(slider);
         sliderRow.append(button, sliderWrap);
 
-        const { head, titleEl: sectionTitle, badgeEl: sectionBadge } =
-          createDrawerSectionHead({
-            title: t("volume.panel"),
-            badgeText: String(level),
-          });
+        const {
+          head,
+          titleEl: sectionTitle,
+          badgeEl: sectionBadge,
+        } = createDrawerSectionHead({
+          title: t("volume.panel"),
+          badgeText: String(level),
+        });
         titleEl = sectionTitle;
         badgeEl = sectionBadge;
 
         root = createDrawerSectionInner("volume", head, sliderRow);
         host.appendChild(root);
 
-        let lastNonZero = level > min ? level : max;
-        const onMuteToggle = (event) => {
-          event.preventDefault();
-          if (!ctx?.isConnected()) return;
-          if (level > min) {
-            lastNonZero = level;
-            setLevel(min, true);
-          } else {
-            setLevel(lastNonZero || max, true);
-          }
-          sendLevel(false);
-        };
         const onInput = () => setLevel(Number(slider.value), true);
         const onChange = () => {
           setLevel(Number(slider.value), false);
           sendLevel(false);
         };
 
-        button.addEventListener("click", onMuteToggle);
+        button.addEventListener("click", onToggleMute);
         slider.addEventListener("input", onInput);
         slider.addEventListener("change", onChange);
         syncUi();
@@ -192,7 +224,8 @@ export function createVolumeFeature(els, t) {
         return () => {
           if (sendTimer) clearTimeout(sendTimer);
           sendTimer = null;
-          button.removeEventListener("click", onMuteToggle);
+          quickVolumeBtn?.removeEventListener("click", onToggleMute);
+          button.removeEventListener("click", onToggleMute);
           slider.removeEventListener("input", onInput);
           slider.removeEventListener("change", onChange);
           root.remove();
@@ -268,6 +301,7 @@ export function createVolumeFeature(els, t) {
         if (sendTimer) clearTimeout(sendTimer);
         sendTimer = null;
         unbindDismiss();
+        quickVolumeBtn?.removeEventListener("click", onToggleMute);
         button.removeEventListener("click", onToggle);
         closeBtn.removeEventListener("click", onClose);
         slider.removeEventListener("input", onInput);
@@ -290,10 +324,14 @@ export function createVolumeFeature(els, t) {
       min = parsed.audio.min;
       max = parsed.audio.max;
       level = parsed.audio.volume;
+      if (level > min) {
+        lastNonZero = level;
+      }
       syncUi();
     },
     setEnabled(enabled) {
       if (button) button.disabled = !enabled;
+      if (quickVolumeBtn) quickVolumeBtn.disabled = !enabled;
       if (!enabled) setPanelOpen(false);
     },
     refreshLabels() {

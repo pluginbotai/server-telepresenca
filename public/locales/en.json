@@ -16,8 +16,6 @@
   "call.rejoin": "Rejoin",
   "call.hangup": "Hang up",
   "call.redirecting": "Redirecting back in {{seconds}}s…",
-  "call.returnNow": "Return to platform",
-  "call.cancelRedirect": "Cancel",
   "media.micOn": "Turn microphone off",
   "media.micOff": "Turn microphone on",
   "media.camOn": "Turn camera off",

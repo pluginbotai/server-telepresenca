@@ -36,10 +36,10 @@ function coerceStatusPayload(payload) {
  * @param {import("socket.io").Server} io
  * @param {object} deps
  * @param {ReturnType<import("../rooms/store.js").createRoomStore>} deps.rooms
- * @param {unknown[]} deps.iceServers
+ * @param {(options?: { role?: string }) => unknown[]} deps.getIceServers
  * @param {ReturnType<import("../log.js").createLogger>} deps.log
  */
-export function attachSignaling(io, { rooms, iceServers, log }) {
+export function attachSignaling(io, { rooms, getIceServers, log }) {
   function kickSocket(socket, event, payload) {
     if (!socket) return;
     const previousRoom = socket.data.roomId;
@@ -176,7 +176,7 @@ export function attachSignaling(io, { rooms, iceServers, log }) {
             effectiveRole === ROLE_OPERATOR
               ? room.robotCapabilities || null
               : undefined,
-          iceServers,
+          iceServers: getIceServers({ role: effectiveRole }),
         });
 
         if (effectiveRole === ROLE_OPERATOR && room.lastStatus) {

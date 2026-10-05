@@ -67,3 +67,57 @@ test("shouldShowMockToggle displays mock button only when no real robot is conne
   assert.equal(shouldShowMockToggle({ ...dev, rtcWithRobot: true }), false);
 });
 
+test("drawer availability policy allows controls screen in dev/offline/mock mode", () => {
+  const evaluateDrawerAllowed = ({
+    hasDrawer,
+    isMockActive,
+    shouldShowMock,
+    connected,
+  }) => {
+    return Boolean(hasDrawer || isMockActive || shouldShowMock || !connected);
+  };
+
+  // Initial load / offline / localhost testing without real robot -> drawer MUST be allowed so user can open controls and click mock
+  assert.equal(
+    evaluateDrawerAllowed({
+      hasDrawer: false,
+      isMockActive: false,
+      shouldShowMock: true,
+      connected: false,
+    }),
+    true,
+  );
+
+  // Mock is active -> drawer is allowed
+  assert.equal(
+    evaluateDrawerAllowed({
+      hasDrawer: true,
+      isMockActive: true,
+      shouldShowMock: false,
+      connected: false,
+    }),
+    true,
+  );
+
+  // Connected to real robot with drawer capabilities -> drawer is allowed
+  assert.equal(
+    evaluateDrawerAllowed({
+      hasDrawer: true,
+      isMockActive: false,
+      shouldShowMock: false,
+      connected: true,
+    }),
+    true,
+  );
+
+  // Connected to real robot WITHOUT any drawer capabilities -> drawer is hidden
+  assert.equal(
+    evaluateDrawerAllowed({
+      hasDrawer: false,
+      isMockActive: false,
+      shouldShowMock: false,
+      connected: true,
+    }),
+    false,
+  );
+});

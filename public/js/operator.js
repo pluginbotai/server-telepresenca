@@ -10,7 +10,12 @@ import { routeControl } from "./signaling/control-route.js";
 import { createVolumeFeature } from "./features/volume.js";
 import { createMediaController } from "./media/local.js";
 import { createLocalPreviewController } from "./media/local-preview.js";
-import { normalizeCapabilities } from "./protocol/capabilities.js";
+import {
+  isFlashlightAvailable,
+  isHeadAvailable,
+  isVolumeAvailable,
+  normalizeCapabilities,
+} from "./protocol/capabilities.js";
 import {
   EVENT_JOINED,
   EVENT_PEER_JOINED,
@@ -31,12 +36,9 @@ import {
   paintCallEnded,
   RECONNECT_GRACE_MS,
 } from "./invite/reconnect.js";
-import {
-  canReturnToPlatform,
-  startRedirectCountdown,
-} from "./invite/redirect.js";
+import { canReturnToPlatform, startRedirectCountdown } from "./invite/redirect.js";
 import { bindLangSwitch } from "./ui/lang-switch.js";
-import { createRobotDrawer } from "./ui/drawer.js";
+import { createRobotDrawer, isRobotDrawerAvailable } from "./ui/drawer.js";
 import {
   getMockCapabilities,
   getMockStatus,
@@ -192,8 +194,7 @@ export function createOperator({
 
   function handleMockControl(action, value) {
     if (action === "volume.set") {
-      const level =
-        typeof value === "object" && value !== null ? value.level : value;
+      const level = typeof value === "object" && value !== null ? value.level : value;
       registry.applyStatus({ volume: { level } });
     } else if (action === "flashlight.toggle" || action === "flashlight.on") {
       mockFlashlightActive = !mockFlashlightActive;
@@ -243,20 +244,39 @@ export function createOperator({
     videoQuality.applyCapabilities(robotCapabilities);
     registry.apply(robotCapabilities, featureContext());
     locomotion.updateMovementHint();
+    const hasVolume = isVolumeAvailable(robotCapabilities);
+    const hasHead = isHeadAvailable(robotCapabilities);
+    const hasFlashlight = isFlashlightAvailable(robotCapabilities);
+    const hasDrawer = isRobotDrawerAvailable(robotCapabilities);
+
+    const showMock = shouldShowMockToggle({
+      robotPeerPresent,
+      rtcWithRobot,
+      search: typeof window !== "undefined" ? window.location.search : "",
+    });
+    const allowDrawer = hasDrawer || isMockActive || showMock || !connected;
+
     if (els.btnToggleRobotDrawer) {
-      els.btnToggleRobotDrawer.hidden = false;
+      els.btnToggleRobotDrawer.hidden = !allowDrawer;
     }
     if (els.btnQuickHeadReset) {
-      els.btnQuickHeadReset.hidden = !robotCapabilities?.head?.available;
+      els.btnQuickHeadReset.hidden = !hasHead;
     }
     if (els.btnQuickFlashlight) {
-      els.btnQuickFlashlight.hidden = !robotCapabilities?.flashlight?.available;
+      els.btnQuickFlashlight.hidden = !hasFlashlight;
     }
     if (els.btnQuickVolume) {
-      els.btnQuickVolume.hidden = robotCapabilities?.volume?.available === false;
+      els.btnQuickVolume.hidden = !hasVolume;
+    }
+    const hasAnyQuickDock = allowDrawer || hasVolume || hasHead || hasFlashlight;
+    if (els.robotQuickDock) {
+      els.robotQuickDock.hidden = !hasAnyQuickDock;
+    }
+    if (!allowDrawer && robotDrawer?.isOpen()) {
+      robotDrawer.close();
     }
     if (els.drawerHeadHost) {
-      if (robotCapabilities?.head?.available) {
+      if (hasHead) {
         els.drawerHeadHost.hidden = false;
         if (!els.drawerHeadHost.querySelector("#btnResetHeadLook")) {
           const resetBtn = document.createElement("button");
@@ -415,7 +435,7 @@ export function createOperator({
       const mockKey = isMockActive ? "media.mockDisable" : "media.mockEnable";
       els.btnToggleMockRobot.setAttribute("aria-label", t(mockKey));
     }
-    if (els.btnQuickVolume) {
+    if (els.btnQuickVolume && !registry.isMounted("volume")) {
       els.btnQuickVolume.setAttribute("aria-label", t("volume.panel"));
     }
     if (els.btnQuickHeadReset) {

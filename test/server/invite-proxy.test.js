@@ -45,7 +45,7 @@ test("proxyInvite forwards status and JSON body", async () => {
 test("createApp returns 503 when ROBOTS_API_URL is missing", async () => {
   const app = createApp({
     publicDir: path.join(ROOT, "public"),
-    iceServers: [],
+    getIceServers: () => [],
     robotsApiUrl: "",
   });
   const server = http.createServer(app);

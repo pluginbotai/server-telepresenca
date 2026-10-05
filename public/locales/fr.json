@@ -16,8 +16,6 @@
   "call.rejoin": "Rejoindre",
   "call.hangup": "Raccrocher",
   "call.redirecting": "Redirection en cours dans {{seconds}}s…",
-  "call.returnNow": "Retour à la plateforme",
-  "call.cancelRedirect": "Annuler",
   "media.micOn": "Couper le micro",
   "media.micOff": "Activer le micro",
   "media.camOn": "Couper la caméra",

@@ -118,7 +118,7 @@ export function createLocomotionSpeedFeature(els, t) {
       groupEl.setAttribute("role", "radiogroup");
       groupEl.setAttribute("aria-label", t("movement.speedAria"));
 
-      const { head, titleEl, badgeEl: headBadge } = createDrawerSectionHead({
+      const { head, badgeEl: headBadge } = createDrawerSectionHead({
         title: t("movement.speedLabel"),
         badgeText: "",
       });

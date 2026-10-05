@@ -21,9 +21,10 @@ function sanitizeHeadLookValue(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return { yaw: 0, pitch: 0 };
   }
+  const val = /** @type {Record<string, unknown>} */ (value);
   return {
-    yaw: clampUnit(Number(value.yaw)),
-    pitch: clampUnit(Number(value.pitch)),
+    yaw: clampUnit(Number(val.yaw)),
+    pitch: clampUnit(Number(val.pitch)),
   };
 }
 
@@ -35,20 +36,18 @@ export function sanitizeControlPayload(payload) {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
     return null;
   }
-  const rawAction = payload.action;
+  const p = /** @type {Record<string, unknown>} */ (payload);
+  const rawAction = p.action;
   if (typeof rawAction !== "string" || !rawAction.trim()) return null;
   const action = rawAction.toLowerCase().trim();
-  const from =
-    typeof payload.from === "string" && payload.from.trim()
-      ? payload.from.trim()
-      : "operator";
+  const from = typeof p.from === "string" && p.from.trim() ? p.from.trim() : "operator";
 
   if (action === "head.look") {
-    return { action, value: sanitizeHeadLookValue(payload.value), from };
+    return { action, value: sanitizeHeadLookValue(p.value), from };
   }
 
-  if (payload.value === undefined) {
+  if (p.value === undefined) {
     return { action, from };
   }
-  return { action, value: payload.value, from };
+  return { action, value: p.value, from };
 }

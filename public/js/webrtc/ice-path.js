@@ -122,7 +122,7 @@ export function formatIcePathMessage(pair) {
   if (pair.usingRelay) {
     return {
       level: "warn",
-      message: `WebRTC usando TURN (relay ${pair.protocol}). Par local=${pair.localType} remoto=${pair.remoteType}. O caminho direto não conectou; a mídia está passando pelo servidor Metered.`,
+      message: `WebRTC usando TURN (relay ${pair.protocol}). Par local=${pair.localType} remoto=${pair.remoteType}. O caminho direto não conectou; a mídia está passando pelo relay configurado.`,
     };
   }
   return {

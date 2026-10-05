@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { loadConfig, loadEnvFile, ROOT_DIR } from "./config.js";
 import { createApp } from "./http/create-app.js";
-import { buildIceServers } from "./ice/ice-servers.js";
+import { buildIceServers, createIceServersProvider } from "./ice/ice-servers.js";
 import { createLogger } from "./log.js";
 import { createRoomStore } from "./rooms/store.js";
 import { createIo } from "./signaling/create-io.js";
@@ -12,18 +12,19 @@ import { attachSignaling } from "./signaling/handlers.js";
 loadEnvFile();
 const config = loadConfig();
 const log = createLogger();
-const iceServers = buildIceServers(config);
+const getIceServers = createIceServersProvider(config);
+const sampleIce = buildIceServers(config);
 const rooms = createRoomStore();
 
 const app = createApp({
   publicDir: path.join(ROOT_DIR, "public"),
-  iceServers,
+  getIceServers,
   corsOrigin: config.corsOrigin,
   robotsApiUrl: config.robotsApiUrl,
 });
 const server = http.createServer(app);
 const io = createIo(server, config.corsOrigin);
-attachSignaling(io, { rooms, iceServers, log });
+attachSignaling(io, { rooms, getIceServers, log });
 
 function getLanAddresses() {
   const nets = os.networkInterfaces();
@@ -48,7 +49,12 @@ server.listen(config.port, "0.0.0.0", () => {
   for (const ip of addresses) {
     log.info(`  Rede:    http://${ip}:${config.port}`);
   }
-  log.info(`  ICE:     ${iceServers.length} server(s)`);
+  log.info(`  ICE:     ${sampleIce.length} server(s)`);
+  if (config.turnStaticAuthSecret) {
+    log.info("  TURN:    credenciais temporárias (auth-secret)");
+  } else if (config.turnUsername && config.turnCredential) {
+    log.info("  TURN:    credencial estática (.env)");
+  }
   log.info(`  Robots:  ${config.robotsApiUrl || "(ROBOTS_API_URL não definido)"}`);
   log.info("========================================");
   log.info("  Abra o front no notebook e use o IP");

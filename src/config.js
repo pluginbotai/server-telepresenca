@@ -36,6 +36,11 @@ export function loadEnvFile(env = process.env) {
  * @property {string[]} turnUrls
  * @property {string} turnUsername
  * @property {string} turnCredential
+ * @property {string} turnStaticAuthSecret
+ * @property {string} turnRealm
+ * @property {string} turnUserId
+ * @property {number} turnCredentialTtl
+ * @property {number} turnRobotCredentialTtl
  * @property {string} robotsApiUrl
  */
 
@@ -44,6 +49,15 @@ export const DEFAULT_STUN_URLS = Object.freeze([
   "stun:stun1.l.google.com:19302",
   "stun:stun.relay.metered.ca:80",
 ]);
+
+/**
+ * @param {string | undefined} raw
+ * @param {number} fallback
+ * @returns {number}
+ */
+function parseIntOr(raw, fallback) {
+  return Number.parseInt(raw || "", 10) || fallback;
+}
 
 /**
  * @param {NodeJS.ProcessEnv} [env]
@@ -62,12 +76,18 @@ export function loadConfig(env = process.env) {
     env.STUN_URLS === undefined ? [...DEFAULT_STUN_URLS] : splitCsv(env.STUN_URLS);
 
   return {
-    port: Number.parseInt(env.PORT || "4040", 10) || 4040,
+    port: parseIntOr(env.PORT, 4040),
     corsOrigin,
     stunUrls,
     turnUrls: splitCsv(env.TURN_URLS),
     turnUsername: env.TURN_USERNAME || "",
     turnCredential: env.TURN_CREDENTIAL || "",
+    turnStaticAuthSecret: env.TURN_STATIC_AUTH_SECRET || "",
+    turnRealm: env.TURN_REALM || "telepresenca",
+    turnUserId: env.TURN_USER_ID || "telepresenca",
+    turnCredentialTtl: parseIntOr(env.TURN_CREDENTIAL_TTL, 86400),
+    // O robô só recebe a senha TURN ao entrar na sala e pode esperar dias (waitForOperator).
+    turnRobotCredentialTtl: parseIntOr(env.TURN_ROBOT_CREDENTIAL_TTL, 604800),
     robotsApiUrl: (env.ROBOTS_API_URL || "").replace(/\/$/, ""),
   };
 }

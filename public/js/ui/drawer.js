@@ -144,16 +144,10 @@ export function createRobotDrawer({
       setOpen(false);
     }
   };
-  const onQuickVolumeClick = (e) => {
-    e?.preventDefault?.();
-    if (!enabled) return;
-    setOpen(true);
-  };
 
   toggleBtn?.addEventListener("click", onToggleClick);
   closeBtn?.addEventListener("click", onCloseClick);
   backdropEl?.addEventListener("click", onCloseClick);
-  btnQuickVolume?.addEventListener("click", onQuickVolumeClick);
   if (typeof document !== "undefined") {
     document.addEventListener("keydown", onKeyDown);
   }
@@ -192,7 +186,6 @@ export function createRobotDrawer({
       toggleBtn?.removeEventListener("click", onToggleClick);
       closeBtn?.removeEventListener("click", onCloseClick);
       backdropEl?.removeEventListener("click", onCloseClick);
-      btnQuickVolume?.removeEventListener("click", onQuickVolumeClick);
       if (typeof document !== "undefined") {
         document.removeEventListener("keydown", onKeyDown);
       }

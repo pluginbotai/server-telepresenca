@@ -27,18 +27,28 @@ function request(url) {
   });
 }
 
-test("/health and /ice-servers are served from the signaling app", async () => {
-  const iceServers = [{ urls: "stun:stun.example:80" }];
+/**
+ * @param {() => Array<{ urls: string, credential?: string }>} getIceServers
+ */
+async function startApp(getIceServers) {
   const app = createApp({
     publicDir: path.join(ROOT, "public"),
-    iceServers,
+    getIceServers,
     robotsApiUrl: "",
   });
   const server = http.createServer(app);
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const address = server.address();
   assert.ok(address && typeof address === "object");
-  const base = `http://127.0.0.1:${address.port}`;
+  return {
+    base: `http://127.0.0.1:${address.port}`,
+    close: () => new Promise((resolve) => server.close(resolve)),
+  };
+}
+
+test("/health and /ice-servers are served from the signaling app", async () => {
+  const iceServers = [{ urls: "stun:stun.example:80" }];
+  const { base, close } = await startApp(() => iceServers);
   try {
     const health = await request(`${base}/health`);
     assert.equal(health.statusCode, 200);
@@ -56,6 +66,25 @@ test("/health and /ice-servers are served from the signaling app", async () => {
     assert.equal(cfg.statusCode, 200);
     assert.equal(JSON.parse(cfg.body).robotsApiUrl, "");
   } finally {
-    await new Promise((resolve) => server.close(resolve));
+    await close();
+  }
+});
+
+test("/ice-servers never exposes TURN credentials", async () => {
+  const { base, close } = await startApp(() => [
+    { urls: "stun:stun.example:3478" },
+    {
+      urls: "turn:turn.example:3478",
+      username: "1:telepresenca",
+      credential: "secret",
+    },
+  ]);
+  try {
+    const ice = await request(`${base}/ice-servers`);
+    assert.deepEqual(JSON.parse(ice.body).iceServers, [
+      { urls: "stun:stun.example:3478" },
+    ]);
+  } finally {
+    await close();
   }
 });
