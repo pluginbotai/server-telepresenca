@@ -24,6 +24,7 @@ export function queryDom() {
     remotePlaceholder: document.getElementById("remotePlaceholder"),
     placeholderText: document.querySelector("#remotePlaceholder p"),
     statusChip: document.getElementById("statusChip"),
+    obstacleAlert: document.getElementById("obstacleAlert"),
     sessionCountdown: document.getElementById("sessionCountdown"),
     movementHint: document.getElementById("movementHint"),
     joystick: document.getElementById("joystick"),

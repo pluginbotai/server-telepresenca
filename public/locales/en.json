@@ -15,6 +15,7 @@
   "status.httpRecvOnly": "HTTP: receiving video and control",
   "status.joinFailed": "Failed to join the room",
   "status.reconnecting": "Reconnecting…",
+  "alert.obstacle": "Obstacle detected",
   "call.ended": "Call ended",
   "call.rejoin": "Rejoin",
   "call.hangup": "Hang up",

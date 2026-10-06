@@ -69,6 +69,23 @@ const MOCK_TEMI_CAPS = {
   power: {
     available: true,
   },
+  emotions: {
+    available: true,
+    faces: [
+      "default",
+      "smile",
+      "happy",
+      "grin",
+      "daze",
+      "love",
+      "music",
+      "proud",
+      "shy",
+      "naughty",
+      "upset",
+      "wronged",
+    ],
+  },
 };
 
 /**

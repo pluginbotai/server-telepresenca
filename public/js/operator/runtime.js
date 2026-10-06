@@ -9,6 +9,7 @@ import { initOperatorMedia } from "./init-media.js";
  * @property {import("../i18n/index.js").i18n} i18n
  * @property {(key: string, vars?: object) => string} t
  * @property {ReturnType<import("../ui/status.js").createStatus>} status
+ * @property {ReturnType<import("../ui/obstacle-alert.js").createObstacleAlert>} obstacleAlert
  * @property {ReturnType<import("../ui/lang-switch.js").bindLangSwitch>} lang
  * @property {ReturnType<import("../signaling/client.js").createSignalingClient>} signaling
  * @property {ReturnType<import("../ui/drawer.js").createRobotDrawer>} robotDrawer
@@ -84,6 +85,7 @@ export function createOperatorRuntime(options) {
     i18n,
     t,
     status: null,
+    obstacleAlert: null,
     lang: null,
     signaling: null,
     robotDrawer: null,

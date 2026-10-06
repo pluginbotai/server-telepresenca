@@ -12,6 +12,7 @@ import { createSessionCountdown } from "../invite/countdown.js";
 import { bindLangSwitch } from "../ui/lang-switch.js";
 import { createRobotDrawer } from "../ui/drawer.js";
 import { createStatus } from "../ui/status.js";
+import { createObstacleAlert } from "../ui/obstacle-alert.js";
 import { createSignalingClient } from "../signaling/client.js";
 
 /**
@@ -23,6 +24,7 @@ export function initOperatorFeatures(runtime, options) {
   const t = runtime.t;
 
   runtime.status = createStatus(els, t);
+  runtime.obstacleAlert = createObstacleAlert(els);
   runtime.lang = bindLangSwitch(els, i18n);
   runtime.signaling = createSignalingClient(ioClient);
 

@@ -76,6 +76,15 @@ export function attachSignaling(io, deps) {
       }
     });
 
+    socket.on("robot-alert", (payload) => {
+      const { roomId, role } = socket.data;
+      const body = coerceStatusPayload(payload);
+      if (!roomId || role !== ROLE_ROBOT || !body) return;
+      const room = rooms.get(roomId);
+      if (!room?.operator) return;
+      io.to(room.operator).emit("robot-alert", body);
+    });
+
     socket.on("video-quality", (payload) => {
       const { roomId, role } = socket.data;
       if (!roomId || role !== ROLE_OPERATOR || !payload) return;

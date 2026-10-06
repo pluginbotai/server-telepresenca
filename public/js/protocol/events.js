@@ -6,6 +6,7 @@ export const EVENT_JOIN = "join";
 export const EVENT_SIGNAL = "signal";
 export const EVENT_CONTROL = "control";
 export const EVENT_STATUS = "status";
+export const EVENT_ROBOT_ALERT = "robot-alert";
 export const EVENT_VIDEO_QUALITY = "video-quality";
 export const EVENT_HANGUP = "hangup";
 export const EVENT_LEAVE = "leave";
@@ -27,6 +28,7 @@ export const CLIENT_TO_SERVER = [
   EVENT_SIGNAL,
   EVENT_CONTROL,
   EVENT_STATUS,
+  EVENT_ROBOT_ALERT,
   EVENT_VIDEO_QUALITY,
   EVENT_HANGUP,
   EVENT_LEAVE,
@@ -42,6 +44,7 @@ export const SERVER_TO_CLIENT = [
   EVENT_SIGNAL,
   EVENT_CONTROL,
   EVENT_STATUS,
+  EVENT_ROBOT_ALERT,
   EVENT_VIDEO_QUALITY,
   EVENT_HANGUP,
   EVENT_ERROR_MESSAGE,

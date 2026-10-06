@@ -7,6 +7,7 @@ import {
   EVENT_SESSION_EXPIRED,
   EVENT_SIGNAL,
   EVENT_STATUS,
+  EVENT_ROBOT_ALERT,
 } from "../protocol/events.js";
 import { buildFeatureContext } from "./feature-context.js";
 import { beginCallWithRobot } from "./call-setup.js";
@@ -127,6 +128,11 @@ function registerSessionHandlers(runtime, socket) {
     if (!runtime.isMockActive) {
       runtime.registry.applyStatus(payload);
     }
+  });
+
+  socket.on(EVENT_ROBOT_ALERT, (payload) => {
+    if (runtime.isMockActive) return;
+    runtime.obstacleAlert?.handleRobotAlert(payload);
   });
 
   socket.on("hangup", () => {
