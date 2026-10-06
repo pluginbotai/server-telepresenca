@@ -21,6 +21,9 @@ export function createTurnRestCredentials({
   }
   const expiry = nowSeconds + Math.max(60, ttlSeconds);
   const username = `${expiry}:${userId}`;
-  const credential = crypto.createHmac("sha1", secret).update(username).digest("base64");
+  const credential = crypto
+    .createHmac("sha1", secret)
+    .update(username)
+    .digest("base64");
   return { username, credential, expiry };
 }

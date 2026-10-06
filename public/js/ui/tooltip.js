@@ -1,3 +1,6 @@
+import { createTooltipController } from "./tooltip-controller.js";
+import { findMatchingElement } from "./tooltip-shared.js";
+
 /**
  * @typedef {object} TooltipOptions
  * @property {number} [enterDelayMs=180] - Delay in milliseconds before showing tooltip on first hover.
@@ -28,64 +31,17 @@ function getOrCreateTooltipElement(doc, root) {
 }
 
 /**
- * @param {HTMLElement} el
- * @param {((el: HTMLElement) => string | null) | undefined} customResolver
- * @returns {string | null}
- */
-function resolveLabel(el, customResolver) {
-  if (typeof customResolver === "function") {
-    return customResolver(el);
-  }
-  const aria = el.getAttribute("aria-label");
-  if (aria?.trim()) return aria.trim();
-  const dataTip = el.getAttribute("data-tooltip");
-  if (dataTip?.trim()) return dataTip.trim();
-  return null;
-}
-
-/**
  * Evita tooltip nativo do browser em paralelo ao `.hud-tooltip`.
  * @param {HTMLElement | Document} root
  * @param {string} selector
  */
 export function suppressNativeTitles(root, selector) {
   const nodes =
-    typeof root.querySelectorAll === "function"
-      ? root.querySelectorAll(selector)
-      : [];
+    typeof root.querySelectorAll === "function" ? root.querySelectorAll(selector) : [];
   for (const el of nodes) {
     if (!el?.hasAttribute?.("title")) continue;
     el.removeAttribute("title");
   }
-}
-
-/**
- * @param {any} target
- * @param {string} selector
- * @returns {HTMLElement | null}
- */
-function findMatchingElement(target, selector) {
-  if (!target || typeof target !== "object") return null;
-  if (typeof target.closest === "function") {
-    return target.closest(selector);
-  }
-  if (typeof target.matches === "function" && target.matches(selector)) {
-    return target;
-  }
-  return null;
-}
-
-/**
- * @param {HTMLElement} tooltipEl
- * @param {HTMLElement} target
- */
-function positionTooltip(tooltipEl, target) {
-  if (typeof target.getBoundingClientRect !== "function") return;
-  const rect = target.getBoundingClientRect();
-  const centerX = rect.left + rect.width / 2;
-  const topY = rect.top - 8;
-  tooltipEl.style.left = `${Math.round(centerX)}px`;
-  tooltipEl.style.top = `${Math.round(topY)}px`;
 }
 
 /**
@@ -154,75 +110,21 @@ export function initTooltips(root, selector = ".ctrl", options = {}) {
       ? document
       : root.ownerDocument || /** @type {Document} */ (root));
 
-  const enterDelayMs = options.enterDelayMs ?? 180;
-  const warmWindowMs = options.warmWindowMs ?? 350;
   const { el: tooltipEl, created: createdElement } = getOrCreateTooltipElement(
     doc,
     root,
   );
-
-  /** @type {ReturnType<typeof setTimeout> | null} */
-  let enterTimer = null;
-  let lastCloseTimestamp = 0;
-  /** @type {HTMLElement | null} */
-  let currentTarget = null;
-
-  /**
-   * @param {HTMLElement} target
-   * @param {boolean} [isWarm=false]
-   */
-  function show(target, isWarm = false) {
-    if (!tooltipEl) return;
-    const label = resolveLabel(target, options.getLabel);
-    if (!label) return hide();
-    tooltipEl.textContent = label;
-    currentTarget = target;
-    positionTooltip(tooltipEl, target);
-    if (isWarm) {
-      tooltipEl.classList.add("is-sliding");
-    } else {
-      tooltipEl.classList.remove("is-sliding");
-    }
-    tooltipEl.setAttribute("aria-hidden", "false");
-    tooltipEl.classList.add("is-visible");
-  }
-
-  function hide() {
-    if (enterTimer) clearTimeout(enterTimer);
-    enterTimer = null;
-    if (tooltipEl) {
-      if (tooltipEl.getAttribute("aria-hidden") === "false") {
-        lastCloseTimestamp = Date.now();
-      }
-      tooltipEl.setAttribute("aria-hidden", "true");
-      tooltipEl.classList.remove("is-visible");
-      tooltipEl.classList.remove("is-sliding");
-    }
-    currentTarget = null;
-  }
-
-  function handleEnter(/** @type {HTMLElement} */ btn) {
-    if (btn.disabled || btn.hasAttribute("disabled")) return hide();
-    if (enterTimer) clearTimeout(enterTimer);
-    if (Date.now() - lastCloseTimestamp < warmWindowMs) {
-      show(btn, true);
-    } else {
-      enterTimer = setTimeout(() => {
-        show(btn, false);
-        enterTimer = null;
-      }, enterDelayMs);
-    }
-  }
+  const controller = createTooltipController(tooltipEl, options);
 
   const cleanupListeners = attachTooltipListeners({
     root,
     doc,
     selector,
-    onEnter: handleEnter,
+    onEnter: controller.handleEnter,
     onLeave: (btn) => {
-      if (btn === currentTarget) hide();
+      if (btn === controller.getCurrentTarget()) controller.hide();
     },
-    onDismiss: hide,
+    onDismiss: controller.hide,
   });
 
   function syncManagedElements() {
@@ -232,14 +134,15 @@ export function initTooltips(root, selector = ".ctrl", options = {}) {
 
   return {
     destroy() {
-      hide();
+      controller.hide();
       cleanupListeners();
       if (createdElement && tooltipEl?.remove) tooltipEl.remove();
     },
     update() {
       syncManagedElements();
+      const currentTarget = controller.getCurrentTarget();
       if (currentTarget && tooltipEl?.classList.contains("is-visible")) {
-        show(currentTarget);
+        controller.show(currentTarget);
       }
     },
   };

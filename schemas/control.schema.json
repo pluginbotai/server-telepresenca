@@ -27,6 +27,9 @@
     { "action": "head.look", "value": { "yaw": 0.2, "pitch": -0.1 } },
     { "action": "head.reset" },
     { "action": "volume.set", "value": { "level": 5 } },
-    { "action": "locomotion.speed.set", "value": { "factor": 0.75 } }
+    { "action": "locomotion.speed.set", "value": { "factor": 0.75 } },
+    { "action": "operator.camera", "value": { "enabled": false, "face": "smile" } },
+    { "action": "operator.face", "value": { "name": "happy" } },
+    { "action": "operator.voice", "value": { "speaking": true } }
   ]
 }

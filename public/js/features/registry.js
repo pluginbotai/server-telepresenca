@@ -21,6 +21,34 @@
  */
 
 /**
+ * @param {{ mounted: Map<string, () => void>, lastStatus: unknown }} state
+ * @param {FeatureModule} feature
+ * @param {object | null} caps
+ * @param {FeatureContext} nextCtx
+ */
+function syncFeatureMount(state, feature, caps, nextCtx) {
+  const { mounted, lastStatus } = state;
+  const shouldMount = feature.isAvailable(caps);
+  const unmount = mounted.get(feature.id);
+  if (shouldMount && !unmount) {
+    const stop = feature.mount(nextCtx);
+    mounted.set(feature.id, typeof stop === "function" ? stop : () => {});
+    if (lastStatus && typeof feature.onStatus === "function") {
+      feature.onStatus(lastStatus);
+    }
+    return;
+  }
+  if (shouldMount && unmount && typeof feature.update === "function") {
+    feature.update(caps, nextCtx);
+    return;
+  }
+  if (!shouldMount && unmount) {
+    unmount();
+    mounted.delete(feature.id);
+  }
+}
+
+/**
  * @param {FeatureModule[]} features
  */
 export function createFeatureRegistry(features) {
@@ -33,23 +61,19 @@ export function createFeatureRegistry(features) {
    * @param {object | null} caps
    * @param {FeatureContext} ctx
    */
+  const mountState = {
+    get mounted() {
+      return mounted;
+    },
+    get lastStatus() {
+      return lastStatus;
+    },
+  };
+
   function apply(caps, ctx) {
     const nextCtx = { ...ctx, caps };
     for (const feature of features) {
-      const shouldMount = feature.isAvailable(caps);
-      const unmount = mounted.get(feature.id);
-      if (shouldMount && !unmount) {
-        const stop = feature.mount(nextCtx);
-        mounted.set(feature.id, typeof stop === "function" ? stop : () => {});
-        if (lastStatus && typeof feature.onStatus === "function") {
-          feature.onStatus(lastStatus);
-        }
-      } else if (shouldMount && unmount && typeof feature.update === "function") {
-        feature.update(caps, nextCtx);
-      } else if (!shouldMount && unmount) {
-        unmount();
-        mounted.delete(feature.id);
-      }
+      syncFeatureMount(mountState, feature, caps, nextCtx);
     }
   }
 

@@ -152,4 +152,3 @@ test("monitorInviteRejoinExpiry is a no-op for non-invite sessions or missing ex
   });
   assert.equal(typeof monitorNoExpiry.stop, "function");
 });
-

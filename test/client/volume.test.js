@@ -148,7 +148,7 @@ test("createVolumeFeature wires btnQuickVolume for 1-click mute toggle (happy pa
     assert.equal(btnQuickVolume.getAttribute("aria-pressed"), "true");
     assert.equal(btnQuickVolume.getAttribute("aria-label"), "Ativar som");
     assert.ok(
-      btnQuickVolume.innerHTML.includes("line x1=\"22\" x2=\"16\""),
+      btnQuickVolume.innerHTML.includes('line x1="22" x2="16"'),
       "must display Lucide muted icon cross line",
     );
     assert.ok(

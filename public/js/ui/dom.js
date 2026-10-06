@@ -49,6 +49,11 @@ export function queryDom() {
     powerHost: document.getElementById("powerHost"),
     volumeHost: document.getElementById("volumeHost"),
     callBar: document.getElementById("callBar"),
+    callBarExtra: document.getElementById("callBarExtra"),
+    btnCallOverflow: document.getElementById("btnCallOverflow"),
+    callOverflowDrawer: document.getElementById("callOverflowDrawer"),
+    callOverflowBackdrop: document.getElementById("callOverflowBackdrop"),
+    callOverflowList: document.getElementById("callOverflowList"),
     hudTooltip: document.getElementById("hudTooltip"),
     btnToggleRobotDrawer: document.getElementById("btnToggleRobotDrawer"),
     btnCloseRobotDrawer: document.getElementById("btnCloseRobotDrawer"),
@@ -62,6 +67,8 @@ export function queryDom() {
     btnQuickVolume: document.getElementById("btnQuickVolume"),
     btnQuickHeadReset: document.getElementById("btnQuickHeadReset"),
     btnQuickFlashlight: document.getElementById("btnQuickFlashlight"),
+    btnQuickEmotions: document.getElementById("btnQuickEmotions"),
+    drawerExpressionsHost: document.getElementById("drawerExpressionsHost"),
     btnToggleMockRobot: document.getElementById("btnToggleMockRobot"),
   };
 }
@@ -82,5 +89,10 @@ export function hostById(id, els) {
   }
   if (id === "flashlight") return els.drawerFlashlightHost || els.featureHost;
   if (id === "head-drawer") return els.drawerHeadHost;
+  if (id === "expressions") {
+    return (
+      els.drawerExpressionsHost || document.querySelector('[data-host="expressions"]')
+    );
+  }
   return document.querySelector(`[data-host="${id}"]`);
 }

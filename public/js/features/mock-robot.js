@@ -147,4 +147,3 @@ export function shouldShowMockToggle({
   if (robotPeerPresent || rtcWithRobot) return false;
   return true;
 }
-

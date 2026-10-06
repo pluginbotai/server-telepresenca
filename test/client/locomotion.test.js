@@ -6,12 +6,22 @@ import {
   LOCOMOTION_HEARTBEAT_INTERVAL_MS,
   createLocomotionFeature,
 } from "../../public/js/features/locomotion.js";
+import { createLocomotionMovement } from "../../public/js/features/locomotion-movement.js";
 import { resolveImports } from "../../scripts/lint-css.mjs";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 test("locomotion heartbeat interval is 80ms for low latency (<100ms)", () => {
   assert.equal(LOCOMOTION_HEARTBEAT_INTERVAL_MS, 80);
+});
+
+test("createLocomotionMovement exposes start/stop API", () => {
+  const movement = createLocomotionMovement({
+    els: {},
+    t: (k) => k,
+  });
+  assert.equal(typeof movement.startMovement, "function");
+  assert.equal(typeof movement.stopMovement, "function");
 });
 
 test("locomotion stopMovement dispatches non-volatile stop command", () => {

@@ -78,7 +78,10 @@ export function attemptCloseOrRedirect(returnUrl, windowObj = window) {
  * @param {string | null} [returnUrl]
  * @param {Window | object} [windowObj]
  */
-export function returnToPreviousOrUrl(returnUrl = null, windowObj = typeof window !== "undefined" ? window : {}) {
+export function returnToPreviousOrUrl(
+  returnUrl = null,
+  windowObj = typeof window !== "undefined" ? window : {},
+) {
   const hasHistory =
     windowObj &&
     windowObj.history &&
@@ -107,10 +110,10 @@ export function returnToPreviousOrUrl(returnUrl = null, windowObj = typeof windo
 function hasBrowserHistory(win) {
   return Boolean(
     win &&
-      win.history &&
-      typeof win.history.back === "function" &&
-      typeof win.history.length === "number" &&
-      win.history.length > 1,
+    win.history &&
+    typeof win.history.back === "function" &&
+    typeof win.history.length === "number" &&
+    win.history.length > 1,
   );
 }
 

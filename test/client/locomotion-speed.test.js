@@ -2,11 +2,16 @@
 import assert from "node:assert/strict";
 import { test } from "../helpers/test.js";
 import { createLocomotionSpeedFeature } from "../../public/js/features/locomotion-speed.js";
+import { readStoredSpeedFactor } from "../../public/js/features/locomotion-speed-store.js";
 import {
   clampLocomotionSpeedFactor,
   locomotionSpeedRange,
   snapLocomotionSpeedFactor,
 } from "../../public/js/protocol/capabilities.js";
+
+test("readStoredSpeedFactor falls back when storage is empty", () => {
+  assert.equal(readStoredSpeedFactor(0.75), 0.75);
+});
 
 function fakeElement() {
   const listeners = {};

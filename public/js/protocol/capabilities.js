@@ -29,6 +29,24 @@ export function isFlashlightAvailable(caps) {
 }
 
 /**
+ * Robot emotions/face display is opt-in.
+ * @param {object | null | undefined} caps
+ */
+export function isEmotionsAvailable(caps) {
+  return caps?.emotions?.available === true;
+}
+
+/**
+ * List of allowed faces supported by the robot.
+ * @param {object | null | undefined} caps
+ * @returns {string[]}
+ */
+export function emotionsFaces(caps) {
+  if (!Array.isArray(caps?.emotions?.faces)) return [];
+  return caps.emotions.faces;
+}
+
+/**
  * Head look is opt-in. Robots without a neck/head omit this.
  * @param {object | null | undefined} caps
  */

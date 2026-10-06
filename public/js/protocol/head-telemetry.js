@@ -21,8 +21,7 @@ export function shouldApplyHeadTelemetry({
   if (now - lastInputAt < HEAD_INPUT_GRACE_MS) return false;
   const pitchDiff =
     typeof head.pitch === "number" ? Math.abs(head.pitch - pose.pitch) : 0;
-  const yawDiff =
-    typeof head.yaw === "number" ? Math.abs(head.yaw - pose.yaw) : 0;
+  const yawDiff = typeof head.yaw === "number" ? Math.abs(head.yaw - pose.yaw) : 0;
   if (
     head.source === "measured" &&
     (pitchDiff > HEAD_MEASURED_TRUST_EPS || yawDiff > HEAD_MEASURED_TRUST_EPS)

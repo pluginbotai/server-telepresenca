@@ -10,6 +10,7 @@ import {
   isLocomotionSpeedAvailable,
   isPowerAvailable,
   isVolumeAvailable,
+  isEmotionsAvailable,
   headAxisLimit,
   headMapping,
   headNormToDeg,
@@ -47,6 +48,13 @@ test("head look is opt-in like flashlight", () => {
   assert.equal(isHeadAvailable(cruzr), true);
   assert.equal(isHeadAvailable(flashlightRobot), false);
   assert.equal(isHeadAvailable({ head: { available: false } }), false);
+});
+
+test("emotions is opt-in like flashlight", () => {
+  assert.equal(isEmotionsAvailable(cruzr), true);
+  assert.equal(isEmotionsAvailable(flashlightRobot), false);
+  assert.equal(isEmotionsAvailable({ emotions: { available: false } }), false);
+  assert.equal(isEmotionsAvailable(null), false);
 });
 
 test("head limits and range mode parse from capabilities", () => {

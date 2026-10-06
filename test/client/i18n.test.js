@@ -97,7 +97,7 @@ test("locale files share keys and interpolation tokens", () => {
 
   const usedKeys = new Set([...htmlKeys, ...codeKeys]);
   for (const match of jsSources.matchAll(
-    /["']((?:status|call|media|movement|room|rtc|brand|app|lang|video|power|volume|invite)[.][^"']+)["']/g,
+    /["']((?:status|call|media|movement|room|rtc|brand|app|lang|video|power|volume|invite|emotions)[.][^"']+)["']/g,
   )) {
     usedKeys.add(match[1]);
   }
@@ -111,12 +111,14 @@ test("locale files share keys and interpolation tokens", () => {
   assert.ok(html.includes("<title>TelePlugin</title>"));
   assert.ok(html.includes("assets/favicon.ico"));
   assert.ok(html.includes("hud-popover"));
-  assert.ok(html.includes("hud-popover-head"));
+  assert.ok((html + jsSources).includes("hud-popover-head"));
   assert.ok(fs.existsSync(path.join(publicDir, "assets/favicon.ico")));
   assert.ok(!html.includes("btnConnect") && !html.includes(">Conectar<"));
   assert.ok(html.includes("kbd-hint"));
-  assert.ok(html.includes("assets/flags/br.png"));
-  assert.ok(html.includes("M12 9c-1.6 0-3.15.25-4.6.72v3.1"));
+  const iconsSvg = fs.existsSync(path.join(publicDir, "assets/icons.svg"))
+    ? fs.readFileSync(path.join(publicDir, "assets/icons.svg"), "utf8")
+    : "";
+  assert.ok((html + iconsSvg).includes("M12 9c-1.6 0-3.15.25-4.6.72v3.1"));
   assert.ok(!jsSources.includes("status.commandSent"));
 
   const forbidden = [

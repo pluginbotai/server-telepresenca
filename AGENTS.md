@@ -21,12 +21,12 @@ O operador está em chamada ao vivo; a interface deve ser **silenciosa e autoexp
 
 Novas seções de controle **devem** usar `public/js/ui/robot-drawer-section.js` (`createDrawerSectionHead`, `createDrawerSectionInner`).
 
-| Elemento | Classe | Anti-padrão (não fazer) |
-| --- | --- | --- |
+| Elemento  | Classe                                                                                        | Anti-padrão (não fazer)                                    |
+| --------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
 | Cabeçalho | `robot-drawer-section-head` + título + badge; ícone se não houver outro na linha de controles | `robot-drawer-card-*`, ícone duplicado (ex. volume + mute) |
-| Controles | filho direto do inner, sem caixa cinza extra | `segmented` com fundo/borda de “card” |
-| Divisores | só via `robot-drawer-body` + seção seguinte (CSS global) | `border-top` / `hr` dentro da feature |
-| Tooltips | só onde o rótulo visível não basta | `title` duplicando o texto do botão |
+| Controles | filho direto do inner, sem caixa cinza extra                                                  | `segmented` com fundo/borda de “card”                      |
+| Divisores | só via `robot-drawer-body` + seção seguinte (CSS global)                                      | `border-top` / `hr` dentro da feature                      |
+| Tooltips  | só onde o rótulo visível não basta                                                            | `title` duplicando o texto do botão                        |
 
 Ritmo vertical: `gap` no `.robot-drawer-body` + `padding-top` na seção irmã; não colar linha divisória no último controle.
 

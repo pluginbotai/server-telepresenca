@@ -153,11 +153,7 @@
   left: var(--head-edge-pct);
   width: 0;
   transform: translateX(-50%);
-  background: radial-gradient(
-    circle at center,
-    var(--head-edge-glow),
-    transparent 70%
-  );
+  background: radial-gradient(circle at center, var(--head-edge-glow), transparent 70%);
 }
 
 .head-edge-rail--vertical .head-edge-fill {
@@ -167,11 +163,7 @@
   top: var(--head-edge-pct);
   height: 0;
   transform: translateY(-50%);
-  background: radial-gradient(
-    circle at center,
-    var(--head-edge-glow),
-    transparent 70%
-  );
+  background: radial-gradient(circle at center, var(--head-edge-glow), transparent 70%);
 }
 
 .head-look-layer.head-edge--revealed .head-edge-fill,

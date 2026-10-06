@@ -4,13 +4,6 @@
     opacity: 0.8;
   }
 
-  .status-chip {
-    max-width: 38vw;
-    font-size: 0.68rem;
-    padding: 0 8px;
-    gap: 6px;
-  }
-
   .move-hud {
     left: auto;
     right: max(12px, env(safe-area-inset-right));
@@ -39,30 +32,89 @@
     display: none;
   }
 
-  .call-bar {
-    gap: 8px;
-    padding: 8px 9px;
-  }
-
-  .ctrl {
-    width: 46px;
-    height: 46px;
-  }
-
-  .quality-panel {
-    width: min(280px, calc(100vw - 24px));
-    bottom: calc(100px + env(safe-area-inset-bottom));
-  }
-
-  .quality-tick-label {
-    font-size: 0.54rem;
-  }
-
   .local-preview {
     left: max(12px, env(safe-area-inset-left));
     right: auto;
     bottom: calc(102px + env(safe-area-inset-bottom));
     width: clamp(96px, 28vw, 168px);
+  }
+}
+
+@media (max-width: 520px) {
+  .hud-top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding-bottom: 4px;
+  }
+
+  .brand {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .room-label {
+    max-width: none;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .hud-top-right {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .status-chip {
+    max-width: none;
+    flex: 1 1 8rem;
+    min-width: 0;
+    font-size: 0.72rem;
+    padding: 0 10px;
+  }
+
+  .session-countdown,
+  .power-chip {
+    flex: none;
+  }
+
+  .lang-switch {
+    margin-left: auto;
+  }
+
+  .move-hud {
+    bottom: calc(78px + env(safe-area-inset-bottom));
+  }
+
+  .joystick {
+    width: 140px;
+    height: 140px;
+  }
+
+  .local-preview {
+    bottom: calc(86px + env(safe-area-inset-bottom));
+    width: clamp(88px, 26vw, 140px);
+  }
+
+  .call-bar .ctrl {
+    width: 46px;
+    height: 46px;
+  }
+}
+
+@media (max-width: 400px) {
+  .lang-switch {
+    display: none;
+  }
+
+  .robot-quick-dock {
+    top: auto;
+    bottom: calc(148px + env(safe-area-inset-bottom));
+    right: max(10px, env(safe-area-inset-right));
+    transform: none;
   }
 }
 
@@ -81,6 +133,11 @@
 
   .quality-thumb,
   .quality-track-fill {
+    transition: none;
+  }
+
+  .call-overflow-drawer,
+  .call-overflow-backdrop {
     transition: none;
   }
 }

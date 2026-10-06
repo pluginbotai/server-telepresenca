@@ -78,6 +78,23 @@
       "pitch": { "minDeg": 180, "maxDeg": 270, "windowDeg": 40 }
     }
   },
+  "emotions": {
+    "available": true,
+    "faces": [
+      "default",
+      "smile",
+      "happy",
+      "grin",
+      "daze",
+      "love",
+      "music",
+      "proud",
+      "shy",
+      "naughty",
+      "upset",
+      "wronged"
+    ]
+  },
   "control": {
     "lease": "single-operator",
     "continuousLatestWins": ["head.look"]

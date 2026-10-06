@@ -46,12 +46,7 @@ function parseHead(raw) {
 function parseHeadAtLimit(raw) {
   if (!raw || typeof raw !== "object") return null;
   const out = {};
-  for (const key of [
-    "yawMin",
-    "yawMax",
-    "pitchMin",
-    "pitchMax",
-  ]) {
+  for (const key of ["yawMin", "yawMax", "pitchMin", "pitchMax"]) {
     if (typeof raw[key] === "boolean") out[key] = raw[key];
   }
   return Object.keys(out).length ? out : null;

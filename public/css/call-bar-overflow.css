@@ -1,0 +1,170 @@
+.call-bar-primary,
+.call-bar-extra {
+  display: contents;
+}
+
+.call-overflow-trigger {
+  display: none;
+}
+
+.call-overflow-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+  background: rgba(0, 0, 0, 0.52);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease;
+}
+
+.call-overflow-backdrop.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.call-overflow-drawer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 12;
+  max-height: min(80dvh, calc(100dvh - 64px));
+  margin-bottom: env(safe-area-inset-bottom, 0);
+  padding: 0 0 max(12px, env(safe-area-inset-bottom));
+  border-radius: 20px 20px 0 0;
+  background: rgba(12, 16, 22, 0.94);
+  border: 1px solid var(--hud-border);
+  border-bottom: none;
+  backdrop-filter: blur(18px);
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.55);
+  transform: translateY(100%);
+  transition: transform 0.24s var(--ease-spring);
+  pointer-events: none;
+}
+
+.call-overflow-drawer.is-open {
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.call-overflow-drag-handle {
+  display: none;
+  width: 38px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.32);
+  margin: 8px auto 4px;
+}
+
+.call-overflow-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px 10px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: calc(80dvh - 64px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.call-overflow-item {
+  appearance: none;
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.call-overflow-item:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.call-overflow-item:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.call-overflow-item.is-off:not(:disabled) {
+  color: #ff8a80;
+}
+
+.call-overflow-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+}
+
+.call-overflow-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.call-overflow-label {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 520px) {
+  .call-overflow-trigger {
+    display: grid;
+  }
+
+  .call-overflow-drag-handle {
+    display: block;
+  }
+
+  .call-bar {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: none;
+    transform: none;
+    justify-content: space-evenly;
+    gap: 6px;
+    padding: 8px max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom))
+      max(10px, env(safe-area-inset-left));
+    border-radius: 0;
+  }
+
+  .call-bar-extra {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .call-bar .ctrl.hangup {
+    margin-left: 0;
+  }
+
+  .quality-panel:not(.hidden) {
+    position: fixed;
+    left: 50%;
+    right: auto;
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+  }
+}

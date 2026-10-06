@@ -17,7 +17,9 @@
 }
 
 /* Ritmo vertical no body (gap) + divisor com respiro acima da linha — evita colar no controle anterior */
-.robot-drawer-body > .robot-drawer-section:not([hidden]) + .robot-drawer-section:not([hidden]) {
+.robot-drawer-body
+  > .robot-drawer-section:not([hidden])
+  + .robot-drawer-section:not([hidden]) {
   margin-top: 4px;
   padding-top: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.09);
@@ -204,6 +206,20 @@
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.22);
   color: #fff;
+}
+
+.robot-drawer-preset-btn.is-active {
+  color: #041414;
+  background: rgba(43, 176, 166, 0.92);
+  border-color: rgba(43, 176, 166, 0.55);
+  box-shadow: 0 2px 10px rgba(43, 176, 166, 0.28);
+}
+
+.robot-drawer-presets-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 4px;
 }
 
 .robot-drawer-segmented {

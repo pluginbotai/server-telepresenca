@@ -42,6 +42,18 @@ test("locomotion.speed.set with factor validates", () => {
   );
 });
 
+test("namespaced operator actions validate", () => {
+  assert.equal(
+    validate({
+      action: "operator.camera",
+      value: { enabled: false, face: "smile" },
+    }),
+    true,
+  );
+  assert.equal(validate({ action: "operator.face", value: { name: "happy" } }), true);
+  assert.equal(validate({ action: "operator.voice", value: { speaking: true } }), true);
+});
+
 test("schema examples are valid", () => {
   for (const example of schema.examples) {
     assert.equal(validate(example), true, JSON.stringify(example));

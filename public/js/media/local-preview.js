@@ -1,5 +1,22 @@
 const DISMISS_STORAGE_KEY = "telepresenca.selfView.dismissed";
 
+function readDismissed() {
+  try {
+    return sessionStorage.getItem(DISMISS_STORAGE_KEY) === "1";
+  } catch (_) {
+    return false;
+  }
+}
+
+function persistDismissed(value) {
+  try {
+    if (value) sessionStorage.setItem(DISMISS_STORAGE_KEY, "1");
+    else sessionStorage.removeItem(DISMISS_STORAGE_KEY);
+  } catch (_) {
+    /* ignore */
+  }
+}
+
 /**
  * @param {{
  *   connected: boolean;
@@ -10,10 +27,7 @@ const DISMISS_STORAGE_KEY = "telepresenca.selfView.dismissed";
  */
 export function shouldShowLocalPreview(state) {
   return Boolean(
-    state.connected &&
-      !state.dismissed &&
-      state.camEnabled &&
-      state.hasLocalVideo,
+    state.connected && !state.dismissed && state.camEnabled && state.hasLocalVideo,
   );
 }
 
@@ -24,31 +38,24 @@ export function shouldShowLocalPreview(state) {
  * @param {() => MediaStream | null} options.getStream
  * @param {() => MediaStreamTrack | null} options.getCamTrack
  */
-export function createLocalPreviewController({
-  els,
-  t,
-  getStream,
-  getCamTrack,
-}) {
+export function createLocalPreviewController({ els, t, getStream, getCamTrack }) {
   let connected = false;
   let dismissed = readDismissed();
   let prevCamEnabled = false;
 
-  function readDismissed() {
-    try {
-      return sessionStorage.getItem(DISMISS_STORAGE_KEY) === "1";
-    } catch (_) {
-      return false;
+  function applyPreviewVisibility(show, stream) {
+    if (els.localPreview) {
+      els.localPreview.hidden = !show;
     }
-  }
-
-  function persistDismissed(value) {
-    try {
-      if (value) sessionStorage.setItem(DISMISS_STORAGE_KEY, "1");
-      else sessionStorage.removeItem(DISMISS_STORAGE_KEY);
-    } catch (_) {
-      /* ignore */
+    if (!els.localPreviewVideo) return;
+    if (show) {
+      if (els.localPreviewVideo.srcObject !== stream) {
+        els.localPreviewVideo.srcObject = stream;
+      }
+      els.localPreviewVideo.play().catch(() => {});
+      return;
     }
+    els.localPreviewVideo.srcObject = null;
   }
 
   function sync() {
@@ -71,20 +78,7 @@ export function createLocalPreviewController({
       camEnabled,
       hasLocalVideo,
     });
-
-    if (els.localPreview) {
-      els.localPreview.hidden = !show;
-    }
-    if (!els.localPreviewVideo) return;
-
-    if (show) {
-      if (els.localPreviewVideo.srcObject !== stream) {
-        els.localPreviewVideo.srcObject = stream;
-      }
-      els.localPreviewVideo.play().catch(() => {});
-      return;
-    }
-    els.localPreviewVideo.srcObject = null;
+    applyPreviewVisibility(show, stream);
   }
 
   function setConnected(value) {
@@ -105,10 +99,7 @@ export function createLocalPreviewController({
 
   function refreshLabels() {
     if (els.btnLocalPreviewClose) {
-      els.btnLocalPreviewClose.setAttribute(
-        "aria-label",
-        t("media.selfViewHide"),
-      );
+      els.btnLocalPreviewClose.setAttribute("aria-label", t("media.selfViewHide"));
     }
     if (els.localPreviewVideo) {
       els.localPreviewVideo.setAttribute("aria-label", t("media.selfView"));

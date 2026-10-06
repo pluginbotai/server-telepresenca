@@ -11,7 +11,9 @@ import {
 
 test("parseReturnUrl extracts return_url from query search string or URL", () => {
   assert.equal(
-    parseReturnUrl("?return_url=https%3A%2F%2Fweb.robots-staging.pluginbot.ai%2Fapps%2Frc3"),
+    parseReturnUrl(
+      "?return_url=https%3A%2F%2Fweb.robots-staging.pluginbot.ai%2Fapps%2Frc3",
+    ),
     "https://web.robots-staging.pluginbot.ai/apps/rc3",
   );
   assert.equal(
@@ -61,7 +63,10 @@ test("returnToPreviousOrUrl prefers window.history.back() when history stack exi
     },
   };
 
-  returnToPreviousOrUrl("https://web.robots-staging.pluginbot.ai/", fakeWindowWithHistory);
+  returnToPreviousOrUrl(
+    "https://web.robots-staging.pluginbot.ai/",
+    fakeWindowWithHistory,
+  );
   assert.equal(backCalled, true);
   assert.equal(assignedUrl, "");
 
@@ -82,7 +87,10 @@ test("returnToPreviousOrUrl prefers window.history.back() when history stack exi
     },
   };
 
-  returnToPreviousOrUrl("https://web.robots-staging.pluginbot.ai/", fakeWindowNoHistory);
+  returnToPreviousOrUrl(
+    "https://web.robots-staging.pluginbot.ai/",
+    fakeWindowNoHistory,
+  );
   assert.equal(backCalled, false);
   assert.equal(assignedUrl, "https://web.robots-staging.pluginbot.ai/");
 });
@@ -174,7 +182,10 @@ test("attemptCloseOrRedirect closes window if allowed or navigates location", ()
     },
   };
 
-  attemptCloseOrRedirect("https://web.robots-staging.pluginbot.ai/", successfulCloseWindow);
+  attemptCloseOrRedirect(
+    "https://web.robots-staging.pluginbot.ai/",
+    successfulCloseWindow,
+  );
   assert.equal(closedCalled, true);
   assert.equal(assignedUrl, "");
 
@@ -193,7 +204,10 @@ test("attemptCloseOrRedirect closes window if allowed or navigates location", ()
     },
   };
 
-  attemptCloseOrRedirect("https://web.robots-staging.pluginbot.ai/", blockedCloseWindow);
+  attemptCloseOrRedirect(
+    "https://web.robots-staging.pluginbot.ai/",
+    blockedCloseWindow,
+  );
   assert.equal(closedCalled, true);
   assert.equal(assignedUrl, "https://web.robots-staging.pluginbot.ai/");
 });
@@ -217,7 +231,11 @@ test("canReturnToPlatform allows platform operator with history or url and block
 
   // Negative: External invite visitor is NEVER auto-redirected
   assert.equal(
-    canReturnToPlatform("http://localhost:3001/invite/abc/end", true, windowWithHistory),
+    canReturnToPlatform(
+      "http://localhost:3001/invite/abc/end",
+      true,
+      windowWithHistory,
+    ),
     false,
   );
   assert.equal(canReturnToPlatform(null, true, windowWithHistory), false);
@@ -226,4 +244,3 @@ test("canReturnToPlatform allows platform operator with history or url and block
   assert.equal(canReturnToPlatform(null, false, windowNoHistory), false);
   assert.equal(canReturnToPlatform("javascript:evil()", false, windowNoHistory), false);
 });
-
