@@ -51,13 +51,12 @@ export function buildHeadEdgeRail(axis, orient, ctx) {
           ...pointerOpts,
           onPitchNorm: (norm) => emitAxis("pitch", norm),
         })
-      : bindHeadEdgeYawPointer(pointerOpts);
+      : bindHeadEdgeYawPointer({
+          ...pointerOpts,
+          onYawNorm: (norm) => emitAxis("yaw", norm),
+        });
 
-  if (axis === "pitch") {
-    rail.addEventListener("pointerdown", beginPointerDrag);
-  } else {
-    input.addEventListener("pointerdown", beginPointerDrag);
-  }
+  rail.addEventListener("pointerdown", beginPointerDrag);
   input.addEventListener("focus", () => reveal());
   input.addEventListener("input", () => {
     emitAxis(axis, clampHeadUnit(Number(input.value) / 100));

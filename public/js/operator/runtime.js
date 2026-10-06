@@ -58,6 +58,7 @@ import { initOperatorMedia } from "./init-media.js";
  * @property {(isConnectedFlag: boolean) => void} setConnectedUi
  * @property {() => void} refreshDynamicText
  * @property {ReturnType<import("../ui/call-bar-overflow.js").initCallBarOverflow> | null} callOverflow
+ * @property {ReturnType<import("../ui/tooltip.js").initTooltips> | null} hudTooltips
  */
 
 /**
@@ -132,6 +133,7 @@ export function createOperatorRuntime(options) {
     setConnectedUi: () => {},
     refreshDynamicText: () => {},
     callOverflow: null,
+    hudTooltips: null,
   };
 
   initOperatorFeatures(runtime, options);

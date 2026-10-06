@@ -1,9 +1,15 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { test } from "../helpers/test.js";
 import {
   createRobotDrawer,
   isRobotDrawerAvailable,
 } from "../../public/js/ui/drawer.js";
+import { isFlashlightAvailable } from "../../public/js/protocol/capabilities.js";
+
+const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 function createMockElement(initialClasses = []) {
   const classes = new Set(initialClasses);
@@ -65,6 +71,25 @@ function createMockElement(initialClasses = []) {
     },
   };
 }
+
+test("drawer.css must not override quick-dock [hidden] (capability gating)", () => {
+  const css = fs.readFileSync(
+    path.join(rootDir, "public/css/drawer.css"),
+    "utf8",
+  );
+  assert.match(
+    css,
+    /\.quick-dock-btn\[hidden\][\s\S]*display:\s*none\s*!important/,
+    "display:grid on .quick-dock-btn breaks HTML hidden without an explicit override",
+  );
+});
+
+test("cruzr fixture does not advertise flashlight quick action", () => {
+  const caps = JSON.parse(
+    fs.readFileSync(path.join(rootDir, "test/fixtures/cruzr-capabilities.json"), "utf8"),
+  );
+  assert.equal(isFlashlightAvailable(caps), false);
+});
 
 test("isRobotDrawerAvailable returns true only when robot has drawer capabilities", () => {
   assert.equal(isRobotDrawerAvailable(null), false);

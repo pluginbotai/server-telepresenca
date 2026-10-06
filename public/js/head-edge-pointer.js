@@ -1,4 +1,4 @@
-import { pitchNormFromTrackY } from "./head-edge-math.js";
+import { pitchNormFromTrackY, yawNormFromTrackX } from "./head-edge-math.js";
 
 /**
  * @param {object} opts
@@ -77,16 +77,29 @@ export function bindHeadEdgePitchPointer(opts) {
 
 /** @param {object} opts */
 export function bindHeadEdgeYawPointer(opts) {
-  const { enabledRef, setPointerDragging, releasePointerDrags, input } = opts;
+  const {
+    enabledRef,
+    setPointerDragging,
+    releasePointerDrags,
+    input,
+    visual,
+    onYawNorm,
+  } = opts;
 
   /** @type {((event: PointerEvent) => void) | null} */
   let endPointerDrag = null;
+  /** @type {((event: PointerEvent) => void) | null} */
+  let movePointerDrag = null;
 
   function clearPointerDragListeners() {
     if (endPointerDrag) {
       window.removeEventListener("pointerup", endPointerDrag, true);
       window.removeEventListener("pointercancel", endPointerDrag, true);
       endPointerDrag = null;
+    }
+    if (movePointerDrag) {
+      window.removeEventListener("pointermove", movePointerDrag, true);
+      movePointerDrag = null;
     }
   }
 
@@ -98,12 +111,25 @@ export function bindHeadEdgeYawPointer(opts) {
     });
   }
 
+  function applyYawFromPointer(clientX) {
+    const rect = visual.getBoundingClientRect();
+    const norm = yawNormFromTrackX(clientX, rect);
+    input.value = String(Math.round(norm * 100));
+    if (onYawNorm) onYawNorm(norm);
+  }
+
   function beginPointerDrag(event) {
     if (!enabledRef() || event.button !== 0) return;
     event.stopPropagation();
     event.preventDefault();
     for (const release of releasePointerDrags) release();
     setPointerDragging(true);
+    applyYawFromPointer(event.clientX);
+    movePointerDrag = (moveEvent) => {
+      if (moveEvent.pointerId !== event.pointerId) return;
+      applyYawFromPointer(moveEvent.clientX);
+    };
+    window.addEventListener("pointermove", movePointerDrag, true);
     endPointerDrag = (upEvent) => {
       if (upEvent.pointerId !== event.pointerId) return;
       finishPointerDrag();

@@ -7,6 +7,7 @@
   align-items: center;
   justify-content: center;
   pointer-events: auto;
+  touch-action: none;
   --head-edge-pct: 50%;
   --head-edge-glow: rgba(120, 200, 255, 0.55);
   --head-edge-track: rgba(255, 255, 255, 0.1);

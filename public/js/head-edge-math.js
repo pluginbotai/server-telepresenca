@@ -18,6 +18,18 @@ export function pitchNormFromTrackY(clientY, rect) {
   return clampHeadUnit(1 - clamped * 2);
 }
 
+/**
+ * Map pointer X on the horizontal track to normalized yaw (-1 left, +1 right).
+ * @param {number} clientX
+ * @param {{ left: number, width: number }} rect
+ */
+export function yawNormFromTrackX(clientX, rect) {
+  const w = Math.max(rect.width, 1);
+  const t = (clientX - rect.left) / w;
+  const clamped = Math.max(0, Math.min(1, t));
+  return clampHeadUnit(clamped * 2 - 1);
+}
+
 /** @param {number} norm */
 export function pitchVisualPctFromNorm(norm) {
   const n = clampHeadUnit(norm);

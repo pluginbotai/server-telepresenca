@@ -120,12 +120,15 @@ export function bindOperatorUi(runtime) {
 
   runtime.localPreview?.bind();
 
-  const tooltips = initTooltips(document, ".ctrl, .quick-dock-btn");
+  runtime.hudTooltips = initTooltips(
+    document,
+    ".ctrl, .quick-dock-btn, .robot-drawer-face-tile",
+  );
   runtime.callOverflow = initCallBarOverflow({ els: runtime.els, t: runtime.t });
 
   document.addEventListener("localechange", () => {
     runtime.refreshDynamicText();
-    tooltips.update();
+    runtime.hudTooltips?.update();
     runtime.callOverflow?.sync();
   });
   onCompactViewportChange(() => {
@@ -133,7 +136,7 @@ export function bindOperatorUi(runtime) {
     runtime.callOverflow?.sync();
   });
   runtime.refreshDynamicText();
-  tooltips.update();
+  runtime.hudTooltips?.update();
   runtime.callOverflow?.sync();
   runtime.countdown.start();
 }

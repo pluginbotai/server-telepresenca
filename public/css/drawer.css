@@ -28,6 +28,10 @@
   display: none !important;
 }
 
+.quick-dock-btn[hidden] {
+  display: none !important;
+}
+
 .quick-dock-btn {
   position: relative;
   width: 44px;

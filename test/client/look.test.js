@@ -12,6 +12,7 @@ import {
   createHeadEdgeSliders,
   pitchNormFromTrackY,
   pitchVisualPctFromNorm,
+  yawNormFromTrackX,
 } from "../../public/js/head-edge-sliders.js";
 import { createHeadLookSurface } from "../../public/js/head-look.js";
 import { createHeadFeature } from "../../public/js/features/head.js";
@@ -177,6 +178,13 @@ test("pitch track maps pointer Y to norm and thumb position", () => {
   assert.equal(pitchVisualPctFromNorm(0), 50);
 });
 
+test("yaw track maps pointer X to normalized yaw", () => {
+  const rect = { left: 50, width: 200 };
+  assert.equal(yawNormFromTrackX(50, rect), -1);
+  assert.equal(yawNormFromTrackX(250, rect), 1);
+  assert.equal(yawNormFromTrackX(150, rect), 0);
+});
+
 test("head edge sliders report normalized axis values", () => {
   const prevDoc = globalThis.document;
   globalThis.document = mockDocument();
@@ -196,6 +204,43 @@ test("head edge sliders report normalized axis values", () => {
   assert.deepEqual(calls[1], { axis: "pitch", value: 0.4 });
   ui.destroy();
   globalThis.document = prevDoc;
+});
+
+test("yaw rail uses pointer drag on the rail like pitch", async () => {
+  const prevDoc = globalThis.document;
+  const prevWindow = globalThis.window;
+  const windowListeners = {};
+  globalThis.document = mockDocument();
+  globalThis.window = {
+    addEventListener(type, fn, capture) {
+      windowListeners[`${type}:${capture ? "capture" : "bubble"}`] = fn;
+    },
+    removeEventListener(type, fn, capture) {
+      const key = `${type}:${capture ? "capture" : "bubble"}`;
+      if (windowListeners[key] === fn) delete windowListeners[key];
+    },
+  };
+  const layer = mockLayer();
+  const calls = [];
+  const ui = createHeadEdgeSliders(layer, {
+    onAxis: (axis, value) => calls.push({ axis, value }),
+  });
+  const yawRail = layer.edgeRails.yaw;
+  yawRail.visual.getBoundingClientRect = () => ({ left: 0, width: 200, top: 0, height: 28 });
+  yawRail.listeners?.pointerdown?.({
+    pointerId: 3,
+    button: 0,
+    clientX: 100,
+    stopPropagation() {},
+    preventDefault() {},
+  });
+  assert.equal(calls.length, 1);
+  assert.deepEqual(calls[0], { axis: "yaw", value: 0 });
+  windowListeners["pointermove:capture"]?.({ pointerId: 3, clientX: 200 });
+  assert.deepEqual(calls[calls.length - 1], { axis: "yaw", value: 1 });
+  ui.destroy();
+  globalThis.document = prevDoc;
+  globalThis.window = prevWindow;
 });
 
 test("head edge sliders release interaction and blur after pointerup", async () => {

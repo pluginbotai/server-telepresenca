@@ -39,5 +39,18 @@ export function buildFeatureContext(runtime) {
     isConnected: () => runtime.isConnected(),
     caps: runtime.robotCapabilities,
     onQualityPresetChange: (preset) => runtime.handleQualityPresetChange(preset),
+    /** Expressões no Cruzr usam avatar estático — alinha câmera do operador se ainda estiver ligada. */
+    syncRobotAvatarForFace: (face) => {
+      if (!runtime.connected) return;
+      const cam = runtime.media.getLocalStream()?.getVideoTracks()?.[0];
+      if (!cam?.enabled) return;
+      cam.enabled = false;
+      runtime.media.refreshMediaButtons(true);
+      runtime.signaling.sendControl("operator.camera", {
+        enabled: false,
+        face,
+      });
+      runtime.audioMonitor.attachStream(runtime.media.getLocalStream());
+    },
   };
 }

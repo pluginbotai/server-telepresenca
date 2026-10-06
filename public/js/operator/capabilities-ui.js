@@ -75,6 +75,7 @@ export function applyRobotCapabilities(runtime, caps, { fromMock = false } = {})
   runtime.robotCapabilities = normalizeCapabilities(caps);
   runtime.videoQuality.applyCapabilities(runtime.robotCapabilities);
   runtime.registry.apply(runtime.robotCapabilities, buildFeatureContext(runtime));
+  runtime.hudTooltips?.update();
   runtime.locomotion.updateMovementHint();
 
   const hasVolume = isVolumeAvailable(runtime.robotCapabilities);

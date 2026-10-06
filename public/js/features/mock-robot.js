@@ -20,12 +20,25 @@ const MOCK_CRUZR_CAPS = {
     yaw: true,
     pitch: true,
   },
-  flashlight: {
-    available: true,
-    modes: ["toggle"],
-  },
   power: {
     available: true,
+  },
+  emotions: {
+    available: true,
+    faces: [
+      "default",
+      "smile",
+      "happy",
+      "grin",
+      "daze",
+      "love",
+      "music",
+      "proud",
+      "shy",
+      "naughty",
+      "upset",
+      "wronged",
+    ],
   },
 };
 

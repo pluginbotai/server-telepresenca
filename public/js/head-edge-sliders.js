@@ -5,7 +5,11 @@
 import { initHeadEdgeSliderDom } from "./head-edge-sliders-init.js";
 import { createHeadEdgeSlidersApi } from "./head-edge-sliders-api.js";
 
-export { pitchNormFromTrackY, pitchVisualPctFromNorm } from "./head-edge-math.js";
+export {
+  pitchNormFromTrackY,
+  pitchVisualPctFromNorm,
+  yawNormFromTrackX,
+} from "./head-edge-math.js";
 
 export function createHeadEdgeSliders(layer, options) {
   const s = {

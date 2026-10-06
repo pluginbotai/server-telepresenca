@@ -107,6 +107,8 @@
   "invite.identifyError": "Invalid identification",
   "invite.timeLeft": "{{time}}",
   "emotions.title": "Facial Expressions",
+  "emotions.scrollPrev": "Previous expressions",
+  "emotions.scrollNext": "Next expressions",
   "emotions.default": "Default",
   "emotions.smile": "Smile",
   "emotions.happy": "Happy",

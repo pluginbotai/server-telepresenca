@@ -107,6 +107,8 @@
   "invite.identifyError": "Identificación inválida",
   "invite.timeLeft": "{{time}}",
   "emotions.title": "Expresiones faciales",
+  "emotions.scrollPrev": "Expresiones anteriores",
+  "emotions.scrollNext": "Expresiones siguientes",
   "emotions.default": "Predeterminado",
   "emotions.smile": "Sonrisa",
   "emotions.happy": "Feliz",

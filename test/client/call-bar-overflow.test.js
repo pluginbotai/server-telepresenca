@@ -21,6 +21,11 @@ test("call-bar-overflow.css hides extra controls and full-width bar below 520px"
     "utf8",
   );
   assert.match(css, /@media\s*\(max-width:\s*520px\)/, "Must use 520px compact breakpoint");
+  assert.match(
+    css,
+    /@media\s*\(max-width:\s*520px\)[\s\S]*\.call-bar-extra[\s\S]*display:\s*block/,
+    "Compact mode must override display:contents so extras stay off the toolbar",
+  );
   assert.match(css, /\.call-bar-extra[\s\S]*clip:\s*rect/, "Must visually hide but keep extra controls");
   assert.match(css, /\.call-overflow-trigger[\s\S]*display:\s*grid/, "Must show overflow trigger");
 });

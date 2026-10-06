@@ -45,6 +45,7 @@ function refreshStatusAndFeatures(runtime) {
   head.refreshLabels();
   videoQuality.refreshLabels();
   registry.refreshLabels();
+  runtime.hudTooltips?.update();
   media.refreshMediaButtons(connected);
   runtime.callOverflow?.sync();
   localPreview?.refreshLabels();

@@ -41,6 +41,16 @@
 }
 
 @media (max-width: 520px) {
+  /* Yaw rail sits under the two-row HUD; layer z-index is below .hud-top (5). */
+  .head-edge-rail--yaw {
+    top: calc(env(safe-area-inset-top, 0px) + 76px);
+    height: 44px;
+    padding-top: 0;
+    left: max(12px, env(safe-area-inset-left));
+    right: max(12px, env(safe-area-inset-right));
+    z-index: 6;
+  }
+
   .hud-top {
     flex-direction: column;
     align-items: stretch;

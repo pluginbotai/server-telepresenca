@@ -370,3 +370,7 @@
   background: rgba(43, 176, 166, 0.1);
   border: 1px solid rgba(43, 176, 166, 0.2);
 }
+
+.robot-drawer-section-badge:empty {
+  display: none;
+}

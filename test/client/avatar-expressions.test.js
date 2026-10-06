@@ -52,16 +52,31 @@ function fakeElement(initialClasses = []) {
     get firstChild() {
       return children[0] || null;
     },
+    querySelector: (selector) => {
+      const all = el.querySelectorAll(selector);
+      return all[0] || null;
+    },
     querySelectorAll: (selector) => {
       const results = [];
+      function matches(node) {
+        if (!node?.classList) return false;
+        if (selector === ".robot-drawer-face-tile") {
+          return node.classList.contains("robot-drawer-face-tile");
+        }
+        if (selector === ".robot-drawer-face-rail") {
+          return node.className === "robot-drawer-face-rail";
+        }
+        if (selector === ".robot-drawer-face-scroll--prev") {
+          return node.className === "robot-drawer-face-scroll robot-drawer-face-scroll--prev";
+        }
+        if (selector === ".robot-drawer-face-scroll--next") {
+          return node.className === "robot-drawer-face-scroll robot-drawer-face-scroll--next";
+        }
+        return false;
+      }
       function traverse(node) {
         if (!node) return;
-        if (
-          selector === ".robot-drawer-preset-btn" &&
-          node.classList?.contains("robot-drawer-preset-btn")
-        ) {
-          results.push(node);
-        }
+        if (matches(node)) results.push(node);
         if (node.children) {
           for (const c of node.children) traverse(c);
         }
@@ -148,6 +163,15 @@ test("expressionsFeature mounts in drawer section and dispatches operator.face o
 
   // Verifies inner structure with dataset.feature = expressions
   assert.equal(mockHost.firstChild.dataset.feature, "expressions");
+  const inner = mockHost.firstChild;
+  const wrap = inner.children.find((c) => c.className === "robot-drawer-face-rail-wrap");
+  assert.ok(wrap, "must mount face rail wrapper");
+  const rail = wrap.children.find((c) => c.className === "robot-drawer-face-rail");
+  assert.ok(rail, "must mount horizontal face rail");
+  assert.ok(
+    rail.children.some((c) => c.className === "robot-drawer-face-tile"),
+    "rail must contain face tiles",
+  );
 
   // Operator clicks smile
   expressionsFeature.selectFace("smile", { send: true });
