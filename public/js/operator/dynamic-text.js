@@ -97,6 +97,14 @@ function refreshDrawerActionLabels(runtime) {
     const span = flashlightBtn.querySelector("span");
     if (span) span.textContent = t("media.flashlight");
   }
+  const followBtn = els.drawerFollowHost?.querySelector('[data-feature="follow"]');
+  if (followBtn instanceof HTMLButtonElement) {
+    const active = followBtn.dataset.followActive === "true";
+    const key = active ? "media.followStop" : "media.followStart";
+    followBtn.setAttribute("aria-label", t(key));
+    const span = followBtn.querySelector("span");
+    if (span) span.textContent = t(key);
+  }
 }
 
 /** @param {import("./runtime.js").OperatorRuntime} runtime */

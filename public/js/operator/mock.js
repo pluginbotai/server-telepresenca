@@ -17,6 +17,22 @@ export function handleMockControl(runtime, action, value) {
         runtime.mockFlashlightActive,
       );
     }
+  } else if (
+    action === "follow.set" ||
+    action === "follow.toggle" ||
+    action === "follow.start" ||
+    action === "follow.stop"
+  ) {
+    const enabled =
+      action === "follow.start"
+        ? true
+        : action === "follow.stop"
+          ? false
+          : typeof value === "object" && value !== null && "enabled" in value
+            ? Boolean(value.enabled)
+            : !runtime.mockFollowActive;
+    runtime.mockFollowActive = enabled;
+    runtime.registry.applyStatus({ follow: { active: enabled } });
   }
 }
 

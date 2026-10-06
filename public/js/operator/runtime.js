@@ -108,6 +108,7 @@ export function createOperatorRuntime(options) {
     isMockActive: false,
     liveRobotCapabilities: null,
     mockFlashlightActive: false,
+    mockFollowActive: false,
     graceTimer: null,
     endedByExpiry: false,
     endedByReplace: false,

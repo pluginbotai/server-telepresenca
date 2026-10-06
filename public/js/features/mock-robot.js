@@ -66,6 +66,9 @@ const MOCK_TEMI_CAPS = {
   flashlight: {
     available: false,
   },
+  follow: {
+    available: true,
+  },
   power: {
     available: true,
   },

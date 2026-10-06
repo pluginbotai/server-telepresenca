@@ -29,6 +29,14 @@ export function isFlashlightAvailable(caps) {
 }
 
 /**
+ * Temi “be with me” / follow person (opt-in).
+ * @param {object | null | undefined} caps
+ */
+export function isFollowAvailable(caps) {
+  return caps?.follow?.available === true;
+}
+
+/**
  * Robot emotions/face display is opt-in.
  * @param {object | null | undefined} caps
  */

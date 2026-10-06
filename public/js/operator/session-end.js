@@ -4,7 +4,11 @@ import {
   paintCallEnded,
   RECONNECT_GRACE_MS,
 } from "../invite/reconnect.js";
-import { canReturnToPlatform, startRedirectCountdown } from "../invite/redirect.js";
+import {
+  canReturnToPlatform,
+  REDIRECT_COUNTDOWN_SECONDS,
+  startRedirectCountdown,
+} from "../invite/redirect.js";
 
 /** @param {import("./runtime.js").OperatorRuntime} runtime */
 export function clearGrace(runtime) {
@@ -56,11 +60,13 @@ export function triggerReturnRedirect(runtime) {
   const { els, t } = runtime;
   if (els.redirectCountdown) {
     els.redirectCountdown.classList.remove("hidden");
-    els.redirectCountdown.textContent = t("call.redirecting", { seconds: 5 });
+    els.redirectCountdown.textContent = t("call.redirecting", {
+      seconds: REDIRECT_COUNTDOWN_SECONDS,
+    });
   }
 
   runtime.redirectController = startRedirectCountdown({
-    countdownSeconds: 5,
+    countdownSeconds: REDIRECT_COUNTDOWN_SECONDS,
     onTick(remaining) {
       if (els.redirectCountdown) {
         els.redirectCountdown.textContent = t("call.redirecting", {

@@ -95,7 +95,7 @@ test("returnToPreviousOrUrl prefers window.history.back() when history stack exi
   assert.equal(assignedUrl, "https://web.robots-staging.pluginbot.ai/");
 });
 
-test("startRedirectCountdown defaults to 5s, calls tick and triggers redirect", async () => {
+test("startRedirectCountdown defaults to 3s, calls tick and triggers redirect", async () => {
   const ticks = [];
   let redirected = false;
 
@@ -113,7 +113,6 @@ test("startRedirectCountdown defaults to 5s, calls tick and triggers redirect", 
 
   await new Promise((resolve) => {
     startRedirectCountdown({
-      countdownSeconds: 5,
       tickIntervalMs: 10,
       windowObj: fakeWindow,
       onTick(remaining) {
@@ -125,11 +124,11 @@ test("startRedirectCountdown defaults to 5s, calls tick and triggers redirect", 
     });
   });
 
-  assert.deepEqual(ticks, [5, 4, 3, 2, 1, 0]);
+  assert.deepEqual(ticks, [3, 2, 1, 0]);
   assert.equal(redirected, true);
 });
 
-test("startRedirectCountdown allows user cancellation before 5s expire", async () => {
+test("startRedirectCountdown allows user cancellation before countdown expires", async () => {
   const ticks = [];
   let redirected = false;
 

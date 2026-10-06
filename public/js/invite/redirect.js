@@ -141,8 +141,11 @@ export function canReturnToPlatform(
   return hasBrowserHistory(targetWin);
 }
 
+/** Segundos exibidos antes de voltar à plataforma após encerrar a chamada. */
+export const REDIRECT_COUNTDOWN_SECONDS = 3;
+
 /**
- * Inicia contagem regressiva de 5 segundos para retorno à plataforma pós-chamada.
+ * Inicia contagem regressiva para retorno à plataforma pós-chamada.
  * @param {object} options
  * @param {string | null} [options.returnUrl]
  * @param {number} [options.countdownSeconds]
@@ -154,7 +157,7 @@ export function canReturnToPlatform(
  */
 export function startRedirectCountdown({
   returnUrl = null,
-  countdownSeconds = 5,
+  countdownSeconds = REDIRECT_COUNTDOWN_SECONDS,
   tickIntervalMs = 1000,
   onTick,
   onRedirect,

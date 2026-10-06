@@ -6,6 +6,7 @@ import { createLocomotionSpeedFeature } from "../features/locomotion-speed.js";
 import { createPowerFeature } from "../features/power.js";
 import { createFeatureRegistry } from "../features/registry.js";
 import { expressionsFeature } from "../features/expressions.js";
+import { followFeature } from "../features/follow.js";
 import { createVideoQualityFeature } from "../features/video-quality.js";
 import { createVolumeFeature } from "../features/volume.js";
 import { createSessionCountdown } from "../invite/countdown.js";
@@ -69,5 +70,6 @@ export function initOperatorFeatures(runtime, options) {
     runtime.power,
     runtime.volume,
     expressionsFeature,
+    followFeature,
   ]);
 }

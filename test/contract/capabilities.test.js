@@ -5,6 +5,7 @@ import {
   isBeepAvailable,
   isContinuousBackward,
   isFlashlightAvailable,
+  isFollowAvailable,
   isHeadAvailable,
   isLocomotionAvailable,
   isLocomotionSpeedAvailable,
@@ -81,6 +82,12 @@ test("battery and volume HUD are opt-in", () => {
 test("flashlight is opt-in", () => {
   assert.equal(isFlashlightAvailable(cruzr), false);
   assert.equal(isFlashlightAvailable(flashlightRobot), true);
+});
+
+test("follow person is opt-in (Temi)", () => {
+  assert.equal(isFollowAvailable(cruzr), false);
+  assert.equal(isFollowAvailable(null), false);
+  assert.equal(isFollowAvailable({ follow: { available: true } }), true);
 });
 
 test("beep can be explicitly disabled", () => {
