@@ -3,12 +3,14 @@ import { createInviteRejoin, runInviteGate, showInviteMessage } from "./invite/g
 import { bindRemoteVideoLayout } from "./media/remote-layout.js";
 import { createOperator } from "./operator.js";
 import { queryDom } from "./ui/dom.js";
+import { mountAppComponents } from "./ui/components.js";
 
 async function boot() {
   if (typeof io !== "function") {
     throw new Error("socket.io UMD missing");
   }
   await i18n.init();
+  mountAppComponents();
   i18n.apply();
   const els = queryDom();
   bindRemoteVideoLayout(els.remoteVideo, document.querySelector(".stage"), {

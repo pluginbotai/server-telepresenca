@@ -32,7 +32,18 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.4"
+  },
+  "overrides": {
+    "engine.io": "6.6.10",
+    "proxy-addr": "2.0.8",
+    "fast-uri": "3.1.8",
+    "smol-toml": "1.9.0",
+    "eslint": {
+      "minimatch": {
+        "brace-expansion": "1.1.21"
+      }
+    }
   },
   "devDependencies": {
     "@eslint/js": "^9.16.0",

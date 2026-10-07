@@ -5,12 +5,57 @@
  */
 export function parseRobotStatus(payload) {
   if (!payload || typeof payload !== "object") {
-    return { power: null, audio: null };
+    return { power: null, audio: null, head: null };
   }
   return {
     power: parsePower(payload.power),
     audio: parseAudio(payload.audio),
+    head: parseHead(payload.head),
   };
+}
+
+/**
+ * @param {any} raw
+ */
+function parseHead(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const out = {
+    yaw: null,
+    pitch: null,
+    source: null,
+    atLimit: null,
+  };
+  if (typeof raw.yaw === "number" && Number.isFinite(raw.yaw)) {
+    out.yaw = clampUnit(raw.yaw);
+  }
+  if (typeof raw.pitch === "number" && Number.isFinite(raw.pitch)) {
+    out.pitch = clampUnit(raw.pitch);
+  }
+  if (raw.source === "measured" || raw.source === "commanded") {
+    out.source = raw.source;
+  }
+  const atLimit = parseHeadAtLimit(raw.atLimit);
+  if (atLimit) out.atLimit = atLimit;
+  if (out.yaw == null && out.pitch == null) return null;
+  return out;
+}
+
+/**
+ * @param {any} raw
+ */
+function parseHeadAtLimit(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const out = {};
+  for (const key of ["yawMin", "yawMax", "pitchMin", "pitchMax"]) {
+    if (typeof raw[key] === "boolean") out[key] = raw[key];
+  }
+  return Object.keys(out).length ? out : null;
+}
+
+function clampUnit(value) {
+  if (value > 1) return 1;
+  if (value < -1) return -1;
+  return value;
 }
 
 /**

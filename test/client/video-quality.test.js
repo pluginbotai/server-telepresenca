@@ -5,6 +5,7 @@ import {
   resolveVideoCapabilities,
   savePresetId,
 } from "../../public/js/features/video-quality.js";
+import { DEFAULT_PRESETS } from "../../public/js/features/video-quality-presets.js";
 import { captureFormatKey } from "../../public/js/webrtc/quality.js";
 
 const store = {};
@@ -36,6 +37,7 @@ test("resolveVideoCapabilities uses robot presets when present", () => {
 });
 
 test("resolveVideoCapabilities falls back to five default presets", () => {
+  assert.equal(DEFAULT_PRESETS.length, 5);
   const fallback = resolveVideoCapabilities(null);
   assert.equal(fallback.presets.length, 5);
   assert.equal(fallback.defaultPreset, "high");

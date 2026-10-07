@@ -6,3 +6,4 @@ reports/
 .jscpd-report/
 coverage/
 *.tsbuildinfo
+*.md

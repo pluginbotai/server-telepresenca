@@ -1,0 +1,270 @@
+/* --- Head edge sliders (yaw top / pitch left) --- */
+
+.head-edge-rail {
+  position: absolute;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  touch-action: none;
+  --head-edge-pct: 50%;
+  --head-edge-glow: rgba(120, 200, 255, 0.55);
+  --head-edge-track: rgba(255, 255, 255, 0.1);
+  --head-edge-thumb-size: 0px;
+  opacity: 0.35;
+  transition:
+    opacity 0.35s ease,
+    --head-edge-thumb-size 0.28s ease;
+}
+
+.head-edge-rail[hidden] {
+  display: none !important;
+}
+
+.head-look-layer.head-edge--revealed .head-edge-rail,
+.head-look-layer.head-edge--interacting .head-edge-rail,
+.head-look-layer.head-edge--interacting:focus-within .head-edge-rail,
+.head-look-layer.is-dragging .head-edge-rail {
+  opacity: 1;
+}
+
+.head-look-layer.head-edge--disabled .head-edge-rail {
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.head-edge-rail--yaw {
+  top: 0;
+  left: max(56px, env(safe-area-inset-left, 0px));
+  right: max(56px, env(safe-area-inset-right, 0px));
+  height: max(48px, calc(env(safe-area-inset-top, 0px) + 40px));
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.head-edge-rail--pitch {
+  left: 0;
+  top: 18%;
+  bottom: 22%;
+  width: max(48px, calc(env(safe-area-inset-left, 0px) + 40px));
+  padding-left: env(safe-area-inset-left, 0px);
+}
+
+.head-look-layer.head-edge--pitch-only .head-edge-rail--pitch {
+  top: 12%;
+  bottom: 12%;
+}
+
+.head-edge-slider-visual {
+  position: relative;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.35));
+}
+
+.head-edge-rail--horizontal .head-edge-slider-visual {
+  width: min(420px, 72%);
+  height: 28px;
+}
+
+.head-edge-rail--vertical .head-edge-slider-visual {
+  width: 28px;
+  height: min(320px, 58vh);
+}
+
+.head-edge-track {
+  position: absolute;
+  border-radius: 999px;
+  background: var(--head-edge-track);
+  backdrop-filter: blur(8px);
+  transition:
+    background 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.head-edge-rail--horizontal .head-edge-track {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+}
+
+.head-edge-rail--vertical .head-edge-track {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+}
+
+.head-look-layer.head-edge--revealed .head-edge-track,
+.head-look-layer.head-edge--interacting .head-edge-track {
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.head-look-layer.head-edge--revealed .head-edge-rail--horizontal .head-edge-track,
+.head-look-layer.head-edge--interacting .head-edge-rail--horizontal .head-edge-track {
+  height: 4px;
+  margin-top: -2px;
+}
+
+.head-look-layer.head-edge--revealed .head-edge-rail--vertical .head-edge-track,
+.head-look-layer.head-edge--interacting .head-edge-rail--vertical .head-edge-track {
+  width: 4px;
+  margin-left: -2px;
+}
+
+.head-edge-center {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.28);
+  opacity: 0.45;
+  transition: opacity 0.3s ease;
+}
+
+.head-edge-rail--horizontal .head-edge-center {
+  width: 6px;
+  height: 6px;
+  left: 50%;
+  top: 50%;
+  margin: -3px 0 0 -3px;
+}
+
+.head-edge-rail--vertical .head-edge-center {
+  width: 6px;
+  height: 6px;
+  left: 50%;
+  top: 50%;
+  margin: -3px 0 0 -3px;
+}
+
+.head-edge-fill {
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.head-edge-rail--horizontal .head-edge-fill {
+  top: 50%;
+  height: 3px;
+  margin-top: -1.5px;
+  left: var(--head-edge-pct);
+  width: 0;
+  transform: translateX(-50%);
+  background: radial-gradient(circle at center, var(--head-edge-glow), transparent 70%);
+}
+
+.head-edge-rail--vertical .head-edge-fill {
+  left: 50%;
+  width: 3px;
+  margin-left: -1.5px;
+  top: var(--head-edge-pct);
+  height: 0;
+  transform: translateY(-50%);
+  background: radial-gradient(circle at center, var(--head-edge-glow), transparent 70%);
+}
+
+.head-look-layer.head-edge--revealed .head-edge-fill,
+.head-look-layer.head-edge--interacting .head-edge-fill,
+.head-look-layer.is-dragging .head-edge-fill {
+  opacity: 0.75;
+}
+
+.head-edge-thumb {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.35),
+    0 4px 16px rgba(0, 0, 0, 0.45),
+    0 0 20px var(--head-edge-glow);
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity 0.28s ease,
+    transform 0.28s ease,
+    width 0.28s ease,
+    height 0.28s ease;
+}
+
+.head-edge-rail--horizontal .head-edge-thumb {
+  width: 14px;
+  height: 14px;
+  top: 50%;
+  left: var(--head-edge-pct);
+  margin: -7px 0 0 -7px;
+}
+
+.head-edge-rail--vertical .head-edge-thumb {
+  width: 14px;
+  height: 14px;
+  left: 50%;
+  top: var(--head-edge-pct);
+  margin: -7px 0 0 -7px;
+}
+
+.head-look-layer.head-edge--revealed .head-edge-thumb,
+.head-look-layer.head-edge--interacting .head-edge-thumb,
+.head-look-layer.is-dragging .head-edge-thumb {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.head-look-layer.head-edge--interacting .head-edge-rail--horizontal .head-edge-thumb,
+.head-look-layer.head-edge--interacting .head-edge-rail--vertical .head-edge-thumb {
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+}
+
+.head-edge-input {
+  position: absolute;
+  margin: 0;
+  opacity: 0;
+  cursor: grab;
+  z-index: 2;
+  touch-action: none;
+}
+
+.head-edge-rail--horizontal .head-edge-input {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: ew-resize;
+}
+
+.head-edge-rail--vertical .head-edge-input {
+  left: 50%;
+  top: 50%;
+  width: min(320px, 58vh);
+  height: 44px;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  cursor: ns-resize;
+}
+
+.head-edge-rail:has(.head-edge-input:focus-visible) .head-edge-track,
+.head-edge-rail:has(.head-edge-input:active) .head-edge-track {
+  box-shadow: 0 0 0 2px rgba(120, 200, 255, 0.35);
+}
+
+.head-edge-rail.head-edge--at-min .head-edge-fill,
+.head-edge-rail.head-edge--at-max .head-edge-fill {
+  --head-edge-glow: rgba(255, 180, 90, 0.65);
+}
+
+.head-edge-rail.head-edge--at-min .head-edge-track,
+.head-edge-rail.head-edge--at-max .head-edge-track {
+  box-shadow: inset 0 0 0 1px rgba(255, 180, 90, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .head-edge-rail,
+  .head-edge-track,
+  .head-edge-thumb,
+  .head-edge-fill {
+    transition: none;
+  }
+}

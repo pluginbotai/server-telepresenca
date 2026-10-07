@@ -3,8 +3,6 @@ import { test } from "../helpers/test.js";
 import {
   formatGatheredMessage,
   formatIcePathMessage,
-  liveStatusKey,
-  liveStatusMode,
   mediaPathKind,
   readSelectedPair,
   summarizeGathered,
@@ -71,12 +69,8 @@ test("direct host pair is not a TURN warning", () => {
   assert.equal(entry.level, "info");
   assert.match(entry.message, /caminho direto/);
   assert.equal(mediaPathKind(pair), "udp");
-  assert.equal(liveStatusKey("udp"), "status.liveUdp");
-  assert.equal(liveStatusMode("udp"), "live");
 });
 
 test("relay pair is labeled TURN", () => {
   assert.equal(mediaPathKind({ usingRelay: true }), "turn");
-  assert.equal(liveStatusKey("turn"), "status.liveTurn");
-  assert.equal(liveStatusMode("turn"), "live live-turn");
 });

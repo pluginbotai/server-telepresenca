@@ -1,9 +1,9 @@
 import { isFlashlightAvailable } from "../protocol/capabilities.js";
 
-const ICON = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <path d="M8 3h8l1.5 6H6.5L8 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-  <path d="M9 9v8.5A2.5 2.5 0 0 0 11.5 20h1A2.5 2.5 0 0 0 15 17.5V9" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-  <path d="M12 12v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+const ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M12 13v1" />
+  <path d="M17 2a1 1 0 0 1 1 1v4a3 3 0 0 1-.6 1.8l-.6.8A4 4 0 0 0 16 12v8a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-8a4 4 0 0 0-.8-2.4l-.6-.8A3 3 0 0 1 6 7V3a1 1 0 0 1 1-1z" />
+  <path d="M6 6h12" />
 </svg>`;
 
 export const flashlightFeature = {
@@ -14,14 +14,20 @@ export const flashlightFeature = {
    * @param {import("./registry.js").FeatureContext} ctx
    */
   mount(ctx) {
-    const host = ctx.host("call");
+    const host = ctx.host("flashlight") || ctx.host("call");
     if (!host) return () => {};
+    host.hidden = false;
 
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "ctrl";
+    const isDrawer =
+      host.dataset?.host === "flashlight" ||
+      host.classList?.contains("robot-drawer-section");
+    btn.className = isDrawer ? "robot-drawer-btn" : "ctrl";
     btn.dataset.feature = "flashlight";
-    btn.innerHTML = ICON;
+    btn.innerHTML = isDrawer
+      ? `${ICON} <span>${ctx.t("media.flashlight")}</span>`
+      : ICON;
     btn.disabled = !ctx.isConnected();
     btn.setAttribute("aria-label", ctx.t("media.flashlight"));
 
@@ -34,6 +40,9 @@ export const flashlightFeature = {
     });
 
     host.appendChild(btn);
-    return () => btn.remove();
+    return () => {
+      btn.remove();
+      if (isDrawer) host.hidden = true;
+    };
   },
 };

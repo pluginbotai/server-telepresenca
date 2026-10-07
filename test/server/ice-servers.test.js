@@ -35,7 +35,49 @@ test("empty config yields an empty list (LAN host candidates)", () => {
     turnUrls: [],
     turnUsername: "",
     turnCredential: "",
+    turnStaticAuthSecret: "",
+    turnRealm: "",
+    turnUserId: "telepresenca",
+    turnCredentialTtl: 86400,
   });
   assert.deepEqual(iceServers, []);
+  assert.equal(validate({ iceServers }), true);
+});
+
+test("robot TURN password outlives the operator one", () => {
+  const config = {
+    stunUrls: [],
+    turnUrls: ["turn:turn.example:3478"],
+    turnUsername: "",
+    turnCredential: "",
+    turnStaticAuthSecret: "shared-secret",
+    turnRealm: "example.com",
+    turnUserId: "telepresenca",
+    turnCredentialTtl: 86400,
+    turnRobotCredentialTtl: 604800,
+  };
+  const now = Math.floor(Date.now() / 1000);
+  /** @param {Array<{ username?: string }>} list */
+  const ttlOf = (list) => Number(String(list[0].username).split(":")[0]) - now;
+  assert.ok(
+    Math.abs(ttlOf(buildIceServers(config, { role: "operator" })) - 86400) <= 5,
+  );
+  assert.ok(Math.abs(ttlOf(buildIceServers(config, { role: "robot" })) - 604800) <= 5);
+});
+
+test("TURN REST secret generates username with expiry prefix", () => {
+  const iceServers = buildIceServers({
+    stunUrls: ["stun:stun.example:3478"],
+    turnUrls: ["turn:turn.example:3478"],
+    turnUsername: "",
+    turnCredential: "",
+    turnStaticAuthSecret: "local-dev-secret",
+    turnRealm: "telepresenca.lan",
+    turnUserId: "telepresenca",
+    turnCredentialTtl: 86400,
+  });
+  assert.equal(iceServers.length, 2);
+  assert.match(iceServers[1].username, /^\d+:telepresenca$/);
+  assert.ok(iceServers[1].credential);
   assert.equal(validate({ iceServers }), true);
 });

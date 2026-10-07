@@ -63,6 +63,13 @@ test("sessionFromJoin prefers session.room and falls back to join URL", () => {
     }).roomId,
     "cruzr-2",
   );
+  assert.equal(
+    "returnUrl" in
+      sessionFromJoin({
+        join: { url: "http://localhost:4040/?room=cruzr-2&role=visitor" },
+      }),
+    false,
+  );
   assert.equal(identificationRequired({ identification: { required: true } }), true);
   assert.equal(identificationRequired({ identification: { required: false } }), false);
 });

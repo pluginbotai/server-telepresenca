@@ -4,8 +4,12 @@
     "rearObstacleSensor": false,
     "frontObstacleSensor": true,
     "turnSignInverted": true,
-    "backwardPulseDistanceM": 0.2,
-    "backwardPulseCooldownMs": 400
+    "backwardPulseDistanceM": 0.3,
+    "backwardPulseCooldownMs": 400,
+    "speed": true,
+    "speedMin": 0.35,
+    "speedMax": 1,
+    "speedDefault": 1
   },
   "audio": {
     "beep": true,
@@ -66,6 +70,43 @@
   "head": {
     "available": true,
     "yaw": true,
-    "pitch": true
+    "pitch": true,
+    "rangeMode": "full",
+    "mapping": { "yawInverted": false, "pitchInverted": true },
+    "limits": {
+      "yaw": { "minDeg": 25, "maxDeg": 335, "windowDeg": 55 },
+      "pitch": { "minDeg": 180, "maxDeg": 270, "windowDeg": 40 }
+    }
+  },
+  "emotions": {
+    "available": true,
+    "faces": [
+      "olhos_neutro",
+      "olhos_piscadinha",
+      "olhos_piscar",
+      "olhos_surpreso",
+      "olhos_bravo",
+      "olhos_coracao",
+      "olhos_triste",
+      "olhos_tristes",
+      "olhos_pensando",
+      "olhos_desconfiado",
+      "olhos_dormindo",
+      "olhos_sono",
+      "olhos_tonto",
+      "olhos_pulando_animado",
+      "olhos_olhando",
+      "olhando_para_baixo",
+      "olhos_sim",
+      "olhos_equalizador",
+      "olhos_carregando",
+      "olhos_matrix",
+      "olhos_rastro",
+      "olhos_bumerangue"
+    ]
+  },
+  "control": {
+    "lease": "single-operator",
+    "continuousLatestWins": ["head.look"]
   }
 }

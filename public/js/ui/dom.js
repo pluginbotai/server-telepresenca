@@ -18,15 +18,20 @@ export function queryDom() {
     remoteVideo: document.getElementById("remoteVideo"),
     remoteVideoHost: document.getElementById("remoteVideoHost"),
     remoteVideoCanvas: document.getElementById("remoteVideoCanvas"),
+    localPreview: document.getElementById("localPreview"),
+    localPreviewVideo: document.getElementById("localPreviewVideo"),
+    btnLocalPreviewClose: document.getElementById("btnLocalPreviewClose"),
     remotePlaceholder: document.getElementById("remotePlaceholder"),
     placeholderText: document.querySelector("#remotePlaceholder p"),
     statusChip: document.getElementById("statusChip"),
+    obstacleAlert: document.getElementById("obstacleAlert"),
     sessionCountdown: document.getElementById("sessionCountdown"),
     movementHint: document.getElementById("movementHint"),
     joystick: document.getElementById("joystick"),
     kbdHint: document.getElementById("kbdHint"),
     roomLabel: document.getElementById("roomLabel"),
     endedOverlay: document.getElementById("endedOverlay"),
+    redirectCountdown: document.getElementById("redirectCountdown"),
     inviteOverlay: document.getElementById("inviteOverlay"),
     inviteOverlayText: document.getElementById("inviteOverlayText"),
     inviteLogo: document.getElementById("inviteLogo"),
@@ -45,20 +50,54 @@ export function queryDom() {
     powerHost: document.getElementById("powerHost"),
     volumeHost: document.getElementById("volumeHost"),
     callBar: document.getElementById("callBar"),
+    callBarExtra: document.getElementById("callBarExtra"),
+    btnCallOverflow: document.getElementById("btnCallOverflow"),
+    callOverflowDrawer: document.getElementById("callOverflowDrawer"),
+    callOverflowBackdrop: document.getElementById("callOverflowBackdrop"),
+    callOverflowList: document.getElementById("callOverflowList"),
     hudTooltip: document.getElementById("hudTooltip"),
+    btnToggleRobotDrawer: document.getElementById("btnToggleRobotDrawer"),
+    btnCloseRobotDrawer: document.getElementById("btnCloseRobotDrawer"),
+    robotDrawer: document.getElementById("robotDrawer"),
+    robotDrawerBackdrop: document.getElementById("robotDrawerBackdrop"),
+    robotDrawerBody: document.getElementById("robotDrawerBody"),
+    drawerFlashlightHost: document.getElementById("drawerFlashlightHost"),
+    drawerFollowHost: document.getElementById("drawerFollowHost"),
+    drawerLocomotionSpeedHost: document.getElementById("drawerLocomotionSpeedHost"),
+    drawerHeadHost: document.getElementById("drawerHeadHost"),
+    robotQuickDock: document.getElementById("robotQuickDock"),
+    btnQuickVolume: document.getElementById("btnQuickVolume"),
+    btnQuickHeadReset: document.getElementById("btnQuickHeadReset"),
+    btnQuickFlashlight: document.getElementById("btnQuickFlashlight"),
+    btnQuickEmotions: document.getElementById("btnQuickEmotions"),
+    drawerExpressionsHost: document.getElementById("drawerExpressionsHost"),
+    btnToggleMockRobot: document.getElementById("btnToggleMockRobot"),
   };
 }
+
+/** @type {Record<string, (els: ReturnType<typeof queryDom>) => Element | null | undefined>} */
+const HOST_RESOLVERS = {
+  call: (els) => els.featureHost,
+  quality: (els) => els.qualityPanel,
+  locomotion: (els) => els.locomotionHost,
+  head: (els) => els.headLookLayer,
+  "head-look": (els) => els.headLookLayer,
+  power: (els) => els.powerHost,
+  volume: (els) => els.volumeHost,
+  "locomotion-speed": (els) => els.drawerLocomotionSpeedHost,
+  flashlight: (els) => els.drawerFlashlightHost || els.featureHost,
+  follow: (els) => els.drawerFollowHost || els.featureHost,
+  "head-drawer": (els) => els.drawerHeadHost,
+  expressions: (els) =>
+    els.drawerExpressionsHost || document.querySelector('[data-host="expressions"]'),
+};
 
 /**
  * @param {string} id
  * @param {ReturnType<typeof queryDom>} els
  */
 export function hostById(id, els) {
-  if (id === "call") return els.featureHost;
-  if (id === "quality") return els.qualityPanel;
-  if (id === "locomotion") return els.locomotionHost;
-  if (id === "head" || id === "head-look") return els.headLookLayer;
-  if (id === "power") return els.powerHost;
-  if (id === "volume") return els.volumeHost;
+  const resolve = HOST_RESOLVERS[id];
+  if (resolve) return resolve(els);
   return document.querySelector(`[data-host="${id}"]`);
 }

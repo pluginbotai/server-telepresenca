@@ -5,13 +5,13 @@ import { proxyInvite } from "./invite-proxy.js";
 /**
  * @param {object} options
  * @param {string} options.publicDir
- * @param {unknown[]} options.iceServers
+ * @param {() => Array<{ urls: string, credential?: string }>} options.getIceServers
  * @param {string | string[]} [options.corsOrigin]
  * @param {string} [options.robotsApiUrl]
  */
 export function createApp({
   publicDir,
-  iceServers,
+  getIceServers,
   corsOrigin = "*",
   robotsApiUrl = "",
 }) {
@@ -36,9 +36,11 @@ export function createApp({
     res.json({ ok: true, service: "telepresenca-signaling" });
   });
 
+  // Público: só STUN. A senha TURN vai apenas no evento `joined` (quem entrou numa sala),
+  // senão qualquer um usaria a banda do coturn.
   app.get("/ice-servers", (_req, res) => {
     res.setHeader("Cache-Control", "no-store");
-    res.json({ iceServers });
+    res.json({ iceServers: getIceServers().filter((server) => !server.credential) });
   });
 
   app.get("/config", (_req, res) => {

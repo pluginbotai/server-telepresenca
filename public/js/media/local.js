@@ -1,211 +1,73 @@
-import { waitWithTimeout } from "../webrtc/handshake.js";
 import { createScreenShareController } from "./screen-share.js";
+import { refreshMediaButtons } from "./local-refresh.js";
+import { attachLocalMediaToPeer } from "./local-peer.js";
+import { createLocalMediaCapture } from "./local-capture.js";
+import { createLocalMediaToggles } from "./local-toggles.js";
 
-/**
- * @param {object} options
- * @param {object} options.els
- * @param {(key: string) => string} options.t
- * @param {() => RTCPeerConnection | null} options.getPc
- * @param {() => Promise<void>} options.startCallAsOfferer
- * @param {() => unknown} options.getSocket
- */
-export function createMediaController({
-  els,
-  t,
-  getPc,
-  startCallAsOfferer,
-  getSocket,
-}) {
+/** @param {object} options */
+export function createMediaController(options) {
+  const { els, t, getPc, startCallAsOfferer, getSocket, onMediaStateChange } = options;
   let localStream = null;
-  let mediaRequest = null;
-  let mediaGeneration = 0;
 
-  function micTrack() {
-    return localStream ? localStream.getAudioTracks()[0] : null;
-  }
-
-  function camTrack() {
-    return localStream ? localStream.getVideoTracks()[0] : null;
-  }
+  const micTrack = () => (localStream ? localStream.getAudioTracks()[0] : null);
+  const camTrack = () => (localStream ? localStream.getVideoTracks()[0] : null);
 
   const screenShare = createScreenShareController({
     getPc,
     getCamTrack: camTrack,
-    onStateChange() {
-      refreshMediaButtons(true);
-    },
-    onError(err) {
+    onStateChange: () => refresh(true),
+    onError: (err) => {
       console.warn("Screen share error:", err);
-      refreshMediaButtons(true);
+      refresh(true);
     },
   });
 
-  function refreshMediaButtons(connected) {
-    const mic = micTrack();
-    const cam = camTrack();
-    const micOn = Boolean(mic?.enabled);
-    const camOn = Boolean(cam?.enabled);
-    els.btnToggleMic.classList.toggle("is-off", connected && !micOn);
-    els.btnToggleCam.classList.toggle("is-off", connected && !camOn);
-    els.btnToggleMic.setAttribute(
-      "aria-label",
-      t(micOn ? "media.micOn" : "media.micOff"),
-    );
-    els.btnToggleCam.setAttribute(
-      "aria-label",
-      t(camOn ? "media.camOn" : "media.camOff"),
-    );
+  const runtime = {
+    getPc,
+    getSocket,
+    startCallAsOfferer,
+    get localStream() {
+      return localStream;
+    },
+    setLocalStream(stream) {
+      localStream = stream;
+    },
+    getLocalStream: () => localStream,
+    screenShare,
+    micTrack,
+    camTrack,
+    els,
+    t,
+    onMediaStateChange,
+  };
 
-    if (els.btnToggleScreenShare) {
-      const supported = screenShare.isSupported();
-      const sharing = screenShare.isSharing();
-      els.btnToggleScreenShare.disabled = !connected || !supported;
-      els.btnToggleScreenShare.classList.toggle("is-sharing", sharing);
-
-      if (!supported) {
-        els.btnToggleScreenShare.setAttribute(
-          "aria-label",
-          t("media.screenShareUnsupported"),
-        );
-        els.btnToggleScreenShare.setAttribute(
-          "title",
-          t("media.screenShareUnsupported"),
-        );
-      } else {
-        const key = sharing ? "media.screenShareOn" : "media.screenShareOff";
-        els.btnToggleScreenShare.setAttribute("aria-label", t(key));
-        els.btnToggleScreenShare.setAttribute("title", t(key));
-      }
-    }
+  function refresh(connected) {
+    refreshMediaButtons({
+      els,
+      t,
+      screenShare,
+      micTrack,
+      camTrack,
+      onMediaStateChange,
+      connected,
+    });
   }
+  runtime.refresh = refresh;
 
-  async function attachLocalMediaToPeer() {
-    const pc = getPc();
-    if (!pc || !localStream) return;
-    let upgraded = false;
-    for (const track of localStream.getTracks()) {
-      const transceiver = pc.getTransceivers().find((item) => {
-        const senderKind = item.sender?.track?.kind;
-        const receiverKind = item.receiver?.track?.kind;
-        return senderKind === track.kind || receiverKind === track.kind;
-      });
-      if (transceiver?.sender) {
-        if (
-          transceiver.direction === "recvonly" ||
-          transceiver.direction === "inactive"
-        ) {
-          transceiver.direction = "sendrecv";
-          upgraded = true;
-        }
-        if (transceiver.sender.track !== track) {
-          await transceiver.sender.replaceTrack(track);
-          upgraded = true;
-        }
-      } else {
-        pc.addTrack(track, localStream);
-        upgraded = true;
-      }
-    }
-    if (upgraded && getSocket() && pc.signalingState === "stable") {
-      await startCallAsOfferer();
-    }
-  }
-
-  async function ensureMedia({ timeoutMs = 0 } = {}) {
-    if (localStream) return localStream;
-    if (!navigator.mediaDevices?.getUserMedia) {
-      console.warn(
-        "navigator.mediaDevices unavailable in this context; recvonly mode.",
-      );
-      return null;
-    }
-    if (!mediaRequest) {
-      const generation = mediaGeneration;
-      mediaRequest = navigator.mediaDevices
-        .getUserMedia({
-          audio: true,
-          video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            facingMode: "user",
-          },
-        })
-        .then((stream) => {
-          if (generation !== mediaGeneration) {
-            stream.getTracks().forEach((track) => {
-              track.stop();
-            });
-            return null;
-          }
-          localStream = stream;
-          refreshMediaButtons(true);
-          return attachLocalMediaToPeer().then(() => stream);
-        })
-        .catch((err) => {
-          console.warn("Operator camera/microphone unavailable:", err);
-          mediaRequest = null;
-          return null;
-        });
-    }
-    if (!timeoutMs) return mediaRequest;
-    return waitWithTimeout(mediaRequest, timeoutMs, localStream);
-  }
-
-  function stopLocal() {
-    screenShare.stop().catch(() => {});
-    if (localStream) {
-      localStream.getTracks().forEach((track) => {
-        track.stop();
-      });
-      localStream = null;
-    }
-    mediaGeneration += 1;
-    mediaRequest = null;
-  }
-
-  async function toggleMic(connected) {
-    if (!connected) return;
-    if (!localStream) {
-      await ensureMedia();
-      await attachLocalMediaToPeer();
-    }
-    const track = micTrack();
-    if (!track) return;
-    track.enabled = !track.enabled;
-    refreshMediaButtons(connected);
-  }
-
-  async function toggleCam(connected) {
-    if (!connected) return;
-    if (!localStream) {
-      await ensureMedia();
-      await attachLocalMediaToPeer();
-    }
-    const track = camTrack();
-    if (!track) return;
-    track.enabled = !track.enabled;
-    refreshMediaButtons(connected);
-  }
-
-  async function toggleScreenShare(connected) {
-    if (!connected || !screenShare.isSupported()) return;
-    if (!localStream) {
-      await ensureMedia();
-      await attachLocalMediaToPeer();
-    }
-    await screenShare.toggle();
-    refreshMediaButtons(connected);
-  }
+  const capture = createLocalMediaCapture(runtime);
+  runtime.ensureMedia = capture.ensureMedia;
+  const toggles = createLocalMediaToggles(runtime);
 
   return {
-    ensureMedia,
-    attachLocalMediaToPeer,
-    refreshMediaButtons,
-    stopLocal,
-    toggleMic,
-    toggleCam,
-    toggleScreenShare,
+    ensureMedia: capture.ensureMedia,
+    attachLocalMediaToPeer: () => attachLocalMediaToPeer(runtime),
+    refreshMediaButtons: refresh,
+    stopLocal: capture.stopLocal,
+    toggleMic: toggles.toggleMic,
+    toggleCam: toggles.toggleCam,
+    toggleScreenShare: toggles.toggleScreenShare,
     isScreenSharing: () => screenShare.isSharing(),
     getLocalStream: () => localStream,
+    isCamOn: () => Boolean(camTrack()?.enabled),
   };
 }

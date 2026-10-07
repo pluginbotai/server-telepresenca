@@ -1,0 +1,6 @@
+# GHSA-vfj7-8cjw-p6xm: braces ≤3.0.3 (micromatch → eslint-plugin-boundaries).
+# No npm release >3.0.3 yet; dev-only globbing, not production attack surface.
+# Revisit when https://github.com/micromatch/braces publishes a patch.
+[[IgnoredVulns]]
+id = "GHSA-vfj7-8cjw-p6xm"
+reason = "Transitive dev dependency; upstream fix not published on npm (braces 3.0.3 latest)"

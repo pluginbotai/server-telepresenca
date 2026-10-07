@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "../helpers/test.js";
-import { initTooltips } from "../../public/js/ui/tooltip.js";
+import { initTooltips, suppressNativeTitles } from "../../public/js/ui/tooltip.js";
 
 /**
  * Creates a lightweight mock element for DOM testing in Node environment.
@@ -132,6 +132,7 @@ function createMockElement(tagName, initialAttrs = {}) {
     },
     matches(sel) {
       if (sel === ".ctrl") return classList.has("ctrl");
+      if (sel === ".quick-dock-btn") return classList.has("quick-dock-btn");
       return false;
     },
     closest(sel) {
@@ -147,6 +148,9 @@ function createMockElement(tagName, initialAttrs = {}) {
     querySelectorAll(selector) {
       return children.filter((child) => {
         if (selector === ".ctrl") return child.classList.contains("ctrl");
+        if (selector === ".quick-dock-btn") {
+          return child.classList.contains("quick-dock-btn");
+        }
         return false;
       });
     },
@@ -183,6 +187,22 @@ function setupMockDom() {
   body.ownerDocument = doc;
   return { doc, body };
 }
+
+test("initTooltips strips native title to avoid duplicate hints", () => {
+  const { doc, body } = setupMockDom();
+  const btn = doc.createElement("button");
+  btn.classList.add("quick-dock-btn");
+  btn.setAttribute("aria-label", "Centralizar câmera");
+  btn.setAttribute("title", "Centralizar câmera");
+  body.appendChild(btn);
+
+  initTooltips(body, ".quick-dock-btn", { doc });
+  assert.equal(btn.getAttribute("title"), null);
+
+  btn.setAttribute("title", "Outro");
+  suppressNativeTitles(body, ".quick-dock-btn");
+  assert.equal(btn.getAttribute("title"), null);
+});
 
 test("initTooltips mounts singleton and shows on hover with delay", async () => {
   const { doc, body } = setupMockDom();

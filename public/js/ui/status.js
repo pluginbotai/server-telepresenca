@@ -1,3 +1,6 @@
+import { isCompactViewport } from "./viewport-mode.js";
+import { resolveStatusDisplayKey } from "./status-display.js";
+
 const RTC_I18N = {
   idle: "rtc.idle",
   connecting: "rtc.connecting",
@@ -19,8 +22,9 @@ export function createStatus(els, t) {
   }
 
   function setStatus(key, mode = "") {
-    els.statusChip.textContent = t(key);
     els.statusChip.dataset.i18n = key;
+    const displayKey = resolveStatusDisplayKey(key, isCompactViewport());
+    els.statusChip.textContent = t(displayKey);
     els.statusChip.className = `status-chip ${mode}`.trim();
   }
 

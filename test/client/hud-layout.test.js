@@ -8,6 +8,15 @@ import { lintCssDirectory } from "../../scripts/lint-css.mjs";
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const publicDir = path.join(rootDir, "public");
 
+test("operator index.html is valid, unified, and contains essential root elements", () => {
+  const indexHtml = fs.readFileSync(path.join(publicDir, "index.html"), "utf8");
+  assert.ok(indexHtml.includes("<!doctype html>"), "Must have DOCTYPE");
+  assert.ok(indexHtml.includes('id="callBar"'), "Must contain callBar");
+  assert.ok(indexHtml.includes('id="callBarExtra"'), "Must contain callBarExtra");
+  assert.ok(indexHtml.includes('id="robotDrawer"'), "Must contain robotDrawer");
+  assert.ok(indexHtml.includes('id="remoteVideoHost"'), "Must contain remoteVideoHost");
+});
+
 test("public/ CSS files comply with 400-line limit, design tokens, and pixel perfection", () => {
   const result = lintCssDirectory(publicDir, 400);
   assert.equal(
