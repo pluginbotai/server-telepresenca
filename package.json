@@ -36,7 +36,14 @@
   },
   "overrides": {
     "engine.io": "6.6.10",
-    "proxy-addr": "2.0.8"
+    "proxy-addr": "2.0.8",
+    "fast-uri": "3.1.8",
+    "smol-toml": "1.9.0",
+    "eslint": {
+      "minimatch": {
+        "brace-expansion": "1.1.21"
+      }
+    }
   },
   "devDependencies": {
     "@eslint/js": "^9.16.0",
