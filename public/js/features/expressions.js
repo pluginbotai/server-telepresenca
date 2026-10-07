@@ -12,25 +12,46 @@ const FACE_SCROLL_CHEVRON_NEXT =
 
 /**
  * Controle de expressões no drawer do operador (capability emotions opt-in).
+ * IDs alinhados aos drawables Android (olhos_*.gif) e TemiAvatarController / CruzrAvatarController.
  */
 
 export const SUPPORTED_EXPRESSIONS = [
-  { id: "default", emoji: "😊", labelKey: "emotions.default", label: "Padrão" },
-  { id: "smile", emoji: "😃", labelKey: "emotions.smile", label: "Sorriso" },
-  { id: "happy", emoji: "😄", labelKey: "emotions.happy", label: "Feliz" },
-  { id: "grin", emoji: "😁", labelKey: "emotions.grin", label: "Contente" },
-  { id: "daze", emoji: "🤔", labelKey: "emotions.daze", label: "Pensativo" },
-  { id: "love", emoji: "😍", labelKey: "emotions.love", label: "Amor" },
-  { id: "music", emoji: "🎵", labelKey: "emotions.music", label: "Música" },
-  { id: "proud", emoji: "😎", labelKey: "emotions.proud", label: "Confiante" },
-  { id: "shy", emoji: "😳", labelKey: "emotions.shy", label: "Tímido" },
-  { id: "naughty", emoji: "😜", labelKey: "emotions.naughty", label: "Travesso" },
-  { id: "upset", emoji: "🙁", labelKey: "emotions.upset", label: "Chateado" },
-  { id: "wronged", emoji: "🥺", labelKey: "emotions.wronged", label: "Injustiçado" },
+  { id: "olhos_neutro", emoji: "😐", labelKey: "emotions.olhos_neutro", label: "Neutro" },
+  { id: "olhos_piscadinha", emoji: "😉", labelKey: "emotions.olhos_piscadinha", label: "Piscadinha" },
+  { id: "olhos_piscar", emoji: "😑", labelKey: "emotions.olhos_piscar", label: "Piscar" },
+  { id: "olhos_surpreso", emoji: "😲", labelKey: "emotions.olhos_surpreso", label: "Surpreso" },
+  { id: "olhos_bravo", emoji: "😠", labelKey: "emotions.olhos_bravo", label: "Bravo" },
+  { id: "olhos_coracao", emoji: "😍", labelKey: "emotions.olhos_coracao", label: "Coração" },
+  { id: "olhos_triste", emoji: "😢", labelKey: "emotions.olhos_triste", label: "Triste" },
+  { id: "olhos_tristes", emoji: "😭", labelKey: "emotions.olhos_tristes", label: "Muito triste" },
+  { id: "olhos_pensando", emoji: "🤔", labelKey: "emotions.olhos_pensando", label: "Pensando" },
+  { id: "olhos_desconfiado", emoji: "🤨", labelKey: "emotions.olhos_desconfiado", label: "Desconfiado" },
+  { id: "olhos_dormindo", emoji: "😴", labelKey: "emotions.olhos_dormindo", label: "Dormindo" },
+  { id: "olhos_sono", emoji: "🥱", labelKey: "emotions.olhos_sono", label: "Com sono" },
+  { id: "olhos_tonto", emoji: "😵‍💫", labelKey: "emotions.olhos_tonto", label: "Tonto" },
+  {
+    id: "olhos_pulando_animado",
+    emoji: "🤩",
+    labelKey: "emotions.olhos_pulando_animado",
+    label: "Animado",
+  },
+  { id: "olhos_olhando", emoji: "👀", labelKey: "emotions.olhos_olhando", label: "Olhando" },
+  {
+    id: "olhando_para_baixo",
+    emoji: "👇",
+    labelKey: "emotions.olhando_para_baixo",
+    label: "Olhando para baixo",
+  },
+  { id: "olhos_sim", emoji: "👍", labelKey: "emotions.olhos_sim", label: "Sim" },
+  { id: "olhos_equalizador", emoji: "🎵", labelKey: "emotions.olhos_equalizador", label: "Música" },
+  { id: "olhos_carregando", emoji: "⏳", labelKey: "emotions.olhos_carregando", label: "Carregando" },
+  { id: "olhos_matrix", emoji: "👾", labelKey: "emotions.olhos_matrix", label: "Matrix" },
+  { id: "olhos_rastro", emoji: "💫", labelKey: "emotions.olhos_rastro", label: "Rastro" },
+  { id: "olhos_bumerangue", emoji: "🔄", labelKey: "emotions.olhos_bumerangue", label: "Bumerangue" },
 ];
 
 /** @type {string} */
-let currentFace = "default";
+let currentFace = "olhos_neutro";
 
 /** @type {import("./registry.js").FeatureContext | null} */
 let activeCtx = null;

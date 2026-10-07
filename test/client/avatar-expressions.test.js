@@ -154,9 +154,9 @@ test("expressionsFeature mounts in drawer section and dispatches operator.face o
     host: (id) => (id === "expressions" ? mockHost : null),
     t: (k) => {
       if (k === "emotions.title") return "Expressões Faciais";
-      if (k === "emotions.default") return "Padrão";
-      if (k === "emotions.smile") return "Sorriso";
-      if (k === "emotions.happy") return "Feliz";
+      if (k === "emotions.olhos_neutro") return "Neutro";
+      if (k === "emotions.olhos_coracao") return "Coração";
+      if (k === "emotions.olhos_bravo") return "Bravo";
       return k;
     },
   };
@@ -179,19 +179,17 @@ test("expressionsFeature mounts in drawer section and dispatches operator.face o
     "rail must contain face tiles",
   );
 
-  // Operator clicks smile
-  expressionsFeature.selectFace("smile", { send: true });
+  expressionsFeature.selectFace("olhos_piscadinha", { send: true });
   assert.equal(sentControls.length, 1);
   assert.equal(sentControls[0].action, "operator.face");
-  assert.deepEqual(sentControls[0].value, { name: "smile" });
-  assert.equal(expressionsFeature.getCurrentFace(), "smile");
+  assert.deepEqual(sentControls[0].value, { name: "olhos_piscadinha" });
+  assert.equal(expressionsFeature.getCurrentFace(), "olhos_piscadinha");
 
-  // Operator clicks happy
-  expressionsFeature.selectFace("happy", { send: true });
+  expressionsFeature.selectFace("olhos_coracao", { send: true });
   assert.equal(sentControls.length, 2);
   assert.equal(sentControls[1].action, "operator.face");
-  assert.deepEqual(sentControls[1].value, { name: "happy" });
-  assert.equal(expressionsFeature.getCurrentFace(), "happy");
+  assert.deepEqual(sentControls[1].value, { name: "olhos_coracao" });
+  assert.equal(expressionsFeature.getCurrentFace(), "olhos_coracao");
 
   unmount();
   assert.equal(mockHost.hidden, true);
