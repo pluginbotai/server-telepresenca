@@ -24,11 +24,39 @@ export function applyVolumeRangeFromCaps(state, caps) {
 /** @param {object} state */
 export function sendVolumeLevel(state, volatile) {
   if (!state.ctx?.isConnected()) return;
+  if (state.sendTimer) {
+    clearTimeout(state.sendTimer);
+    state.sendTimer = null;
+  }
   state.ctx.sendControl(
     "volume.set",
     { level: state.level },
     { volatile: Boolean(volatile) },
   );
+}
+
+/** @param {object} state */
+export function toggleVolumeMute(state) {
+  if (!state.ctx?.isConnected()) return;
+  if (state.muteToggleInFlight) return;
+  state.muteToggleInFlight = true;
+  try {
+    if (state.level > state.min) {
+      state.lastNonZero = state.level;
+      state.level = state.min;
+    } else {
+      state.level = parseVolumeLevel(
+        state.lastNonZero || state.max,
+        state.min,
+        state.max,
+        state.max,
+      );
+    }
+    syncVolumeUi(state);
+    sendVolumeLevel(state, false);
+  } finally {
+    state.muteToggleInFlight = false;
+  }
 }
 
 /** @param {object} state */

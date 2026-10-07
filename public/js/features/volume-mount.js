@@ -137,19 +137,9 @@ function mountVolumePopover(state, host) {
 export function mountVolumeFeature(state, nextCtx) {
   state.ctx = nextCtx;
   state.applyRangeFromCaps(nextCtx.caps);
-  state.onToggleMute = (event) => {
-    event?.preventDefault?.();
-    if (!state.ctx?.isConnected()) return;
-    if (state.level > state.min) {
-      state.lastNonZero = state.level;
-      state.setLevel(state.min, true);
-    } else {
-      state.setLevel(state.lastNonZero || state.max, true);
-    }
-    state.sendLevel(false);
-  };
 
   if (state.quickVolumeBtn) {
+    state.quickVolumeBtn.removeEventListener("click", state.onToggleMute);
     state.quickVolumeBtn.addEventListener("click", state.onToggleMute);
   }
 

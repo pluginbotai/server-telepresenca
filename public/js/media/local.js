@@ -32,6 +32,7 @@ export function createMediaController(options) {
     setLocalStream(stream) {
       localStream = stream;
     },
+    getLocalStream: () => localStream,
     screenShare,
     micTrack,
     camTrack,

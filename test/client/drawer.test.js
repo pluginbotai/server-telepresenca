@@ -268,7 +268,11 @@ test("createRobotDrawer synchronizes aria on quick dock (HUD tooltip, not native
 
   drawer.refreshLabels();
 
-  assert.equal(btnQuickVolume.getAttribute("aria-label"), "Volume do robô");
+  assert.equal(
+    btnQuickVolume.getAttribute("aria-label"),
+    null,
+    "quick volume aria-label is owned by volume feature when mounted",
+  );
   assert.equal(btnQuickHeadReset.getAttribute("aria-label"), "Centralizar câmera");
   assert.equal(btnQuickFlashlight.getAttribute("aria-label"), "Lanterna");
   assert.equal(btnMockToggle.title, "Simular robô conectado");

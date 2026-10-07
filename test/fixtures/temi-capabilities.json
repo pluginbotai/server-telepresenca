@@ -42,8 +42,8 @@
         "id": "mid",
         "width": 800,
         "height": 600,
-        "fps": 30,
-        "maxBitrateKbps": 1500,
+        "fps": 24,
+        "maxBitrateKbps": 1200,
         "adaptive": false
       },
       {
@@ -63,7 +63,7 @@
         "adaptive": false
       }
     ],
-    "defaultPreset": "high",
+    "defaultPreset": "mid",
     "hardwareEncoder": true,
     "adaptiveSupported": true
   },

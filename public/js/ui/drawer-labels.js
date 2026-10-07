@@ -31,7 +31,7 @@ export function updateDrawerLabels({
   updateQuickButtonLabel(closeBtn, "media.robotControlsClose", t, true);
   updateQuickButtonLabel(drawerEl, "media.robotControls", t);
   updateQuickButtonLabel(quickDockEl, "media.quickDock", t);
-  updateQuickButtonLabel(btnQuickVolume, "volume.panel", t);
+  // Volume quick action: labels/pressed state owned by volume feature (mute toggle).
   updateQuickButtonLabel(btnQuickHeadReset, "media.headReset", t);
   updateQuickButtonLabel(btnQuickFlashlight, "media.flashlight", t);
   updateQuickButtonLabel(btnQuickEmotions, "emotions.title", t, true);

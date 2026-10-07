@@ -4,6 +4,7 @@ import {
   applyVolumeStatus,
   sendVolumeLevel,
   setVolumeLevel,
+  toggleVolumeMute,
 } from "./volume-state-methods.js";
 
 /** @param {object} els @param {(key: string, vars?: object) => string} t */
@@ -25,8 +26,13 @@ export function createVolumeState(els, t) {
     level: 5,
     lastNonZero: 5,
     sendTimer: null,
+    muteToggleInFlight: false,
     isDrawerMode: false,
     quickVolumeBtn: els?.btnQuickVolume,
+    onToggleMute: (event) => {
+      event?.preventDefault?.();
+      toggleVolumeMute(state);
+    },
     label: () => t("volume.level", { level: state.level }),
     syncUi: () => syncVolumeUi(state),
     applyRangeFromCaps: (caps) => applyVolumeRangeFromCaps(state, caps),
