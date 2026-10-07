@@ -4,12 +4,32 @@ import {
   shouldShowMockToggle,
 } from "../features/mock-robot.js";
 
+/**
+ * @param {import("./runtime.js").OperatorRuntime} runtime
+ * @param {string} action
+ * @param {unknown} value
+ */
+function applyMockFollowControl(runtime, action, value) {
+  const enabled =
+    action === "follow.start"
+      ? true
+      : action === "follow.stop"
+        ? false
+        : typeof value === "object" && value !== null && "enabled" in value
+          ? Boolean(value.enabled)
+          : !runtime.mockFollowActive;
+  runtime.mockFollowActive = enabled;
+  runtime.registry.applyStatus({ follow: { active: enabled } });
+}
+
 /** @param {import("./runtime.js").OperatorRuntime} runtime */
 export function handleMockControl(runtime, action, value) {
   if (action === "volume.set") {
     const level = typeof value === "object" && value !== null ? value.level : value;
     runtime.registry.applyStatus({ volume: { level } });
-  } else if (action === "flashlight.toggle" || action === "flashlight.on") {
+    return;
+  }
+  if (action === "flashlight.toggle" || action === "flashlight.on") {
     runtime.mockFlashlightActive = !runtime.mockFlashlightActive;
     if (runtime.els.btnQuickFlashlight) {
       runtime.els.btnQuickFlashlight.classList.toggle(
@@ -17,22 +37,15 @@ export function handleMockControl(runtime, action, value) {
         runtime.mockFlashlightActive,
       );
     }
-  } else if (
+    return;
+  }
+  if (
     action === "follow.set" ||
     action === "follow.toggle" ||
     action === "follow.start" ||
     action === "follow.stop"
   ) {
-    const enabled =
-      action === "follow.start"
-        ? true
-        : action === "follow.stop"
-          ? false
-          : typeof value === "object" && value !== null && "enabled" in value
-            ? Boolean(value.enabled)
-            : !runtime.mockFollowActive;
-    runtime.mockFollowActive = enabled;
-    runtime.registry.applyStatus({ follow: { active: enabled } });
+    applyMockFollowControl(runtime, action, value);
   }
 }
 

@@ -226,7 +226,12 @@ test("yaw rail uses pointer drag on the rail like pitch", async () => {
     onAxis: (axis, value) => calls.push({ axis, value }),
   });
   const yawRail = layer.edgeRails.yaw;
-  yawRail.visual.getBoundingClientRect = () => ({ left: 0, width: 200, top: 0, height: 28 });
+  yawRail.visual.getBoundingClientRect = () => ({
+    left: 0,
+    width: 200,
+    top: 0,
+    height: 28,
+  });
   yawRail.listeners?.pointerdown?.({
     pointerId: 3,
     button: 0,

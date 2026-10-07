@@ -75,27 +75,29 @@ export function queryDom() {
   };
 }
 
+/** @type {Record<string, (els: ReturnType<typeof queryDom>) => Element | null | undefined>} */
+const HOST_RESOLVERS = {
+  call: (els) => els.featureHost,
+  quality: (els) => els.qualityPanel,
+  locomotion: (els) => els.locomotionHost,
+  head: (els) => els.headLookLayer,
+  "head-look": (els) => els.headLookLayer,
+  power: (els) => els.powerHost,
+  volume: (els) => els.volumeHost,
+  "locomotion-speed": (els) => els.drawerLocomotionSpeedHost,
+  flashlight: (els) => els.drawerFlashlightHost || els.featureHost,
+  follow: (els) => els.drawerFollowHost || els.featureHost,
+  "head-drawer": (els) => els.drawerHeadHost,
+  expressions: (els) =>
+    els.drawerExpressionsHost || document.querySelector('[data-host="expressions"]'),
+};
+
 /**
  * @param {string} id
  * @param {ReturnType<typeof queryDom>} els
  */
 export function hostById(id, els) {
-  if (id === "call") return els.featureHost;
-  if (id === "quality") return els.qualityPanel;
-  if (id === "locomotion") return els.locomotionHost;
-  if (id === "head" || id === "head-look") return els.headLookLayer;
-  if (id === "power") return els.powerHost;
-  if (id === "volume") return els.volumeHost;
-  if (id === "locomotion-speed") {
-    return els.drawerLocomotionSpeedHost;
-  }
-  if (id === "flashlight") return els.drawerFlashlightHost || els.featureHost;
-  if (id === "follow") return els.drawerFollowHost || els.featureHost;
-  if (id === "head-drawer") return els.drawerHeadHost;
-  if (id === "expressions") {
-    return (
-      els.drawerExpressionsHost || document.querySelector('[data-host="expressions"]')
-    );
-  }
+  const resolve = HOST_RESOLVERS[id];
+  if (resolve) return resolve(els);
   return document.querySelector(`[data-host="${id}"]`);
 }

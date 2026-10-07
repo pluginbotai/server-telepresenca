@@ -73,10 +73,7 @@ function createMockElement(initialClasses = []) {
 }
 
 test("drawer.css must not override quick-dock [hidden] (capability gating)", () => {
-  const css = fs.readFileSync(
-    path.join(rootDir, "public/css/drawer.css"),
-    "utf8",
-  );
+  const css = fs.readFileSync(path.join(rootDir, "public/css/drawer.css"), "utf8");
   assert.match(
     css,
     /\.quick-dock-btn\[hidden\][\s\S]*display:\s*none\s*!important/,
@@ -86,7 +83,10 @@ test("drawer.css must not override quick-dock [hidden] (capability gating)", () 
 
 test("cruzr fixture does not advertise flashlight quick action", () => {
   const caps = JSON.parse(
-    fs.readFileSync(path.join(rootDir, "test/fixtures/cruzr-capabilities.json"), "utf8"),
+    fs.readFileSync(
+      path.join(rootDir, "test/fixtures/cruzr-capabilities.json"),
+      "utf8",
+    ),
   );
   assert.equal(isFlashlightAvailable(caps), false);
 });

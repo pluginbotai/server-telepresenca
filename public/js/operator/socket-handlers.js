@@ -14,9 +14,11 @@ import { beginCallWithRobot } from "./call-setup.js";
 import { armGrace, clearGrace, paintEnded } from "./session-end.js";
 import { isTransientDisconnect } from "../invite/reconnect.js";
 
+/** @typedef {ReturnType<ReturnType<import("../signaling/client.js").createSignalingClient>["connect"]>} OperatorSocket */
+
 /**
  * @param {import("./runtime.js").OperatorRuntime} runtime
- * @param {import("socket.io-client").Socket} socket
+ * @param {OperatorSocket} socket
  */
 function registerJoinHandlers(runtime, socket) {
   const { status, signaling } = runtime;
@@ -67,7 +69,7 @@ function registerJoinHandlers(runtime, socket) {
 
 /**
  * @param {import("./runtime.js").OperatorRuntime} runtime
- * @param {import("socket.io-client").Socket} socket
+ * @param {OperatorSocket} socket
  */
 function registerPeerHandlers(runtime, socket) {
   const { status, peer } = runtime;
@@ -110,7 +112,7 @@ function registerPeerHandlers(runtime, socket) {
 
 /**
  * @param {import("./runtime.js").OperatorRuntime} runtime
- * @param {import("socket.io-client").Socket} socket
+ * @param {OperatorSocket} socket
  */
 function registerSessionHandlers(runtime, socket) {
   const { status, peer, locomotion } = runtime;
@@ -173,7 +175,7 @@ function registerSessionHandlers(runtime, socket) {
 
 /**
  * @param {import("./runtime.js").OperatorRuntime} runtime
- * @param {import("socket.io-client").Socket} socket
+ * @param {OperatorSocket} socket
  */
 export function registerOperatorSocketHandlers(runtime, socket) {
   registerJoinHandlers(runtime, socket);

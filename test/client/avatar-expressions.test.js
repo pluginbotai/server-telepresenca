@@ -67,10 +67,14 @@ function fakeElement(initialClasses = []) {
           return node.className === "robot-drawer-face-rail";
         }
         if (selector === ".robot-drawer-face-scroll--prev") {
-          return node.className === "robot-drawer-face-scroll robot-drawer-face-scroll--prev";
+          return (
+            node.className === "robot-drawer-face-scroll robot-drawer-face-scroll--prev"
+          );
         }
         if (selector === ".robot-drawer-face-scroll--next") {
-          return node.className === "robot-drawer-face-scroll robot-drawer-face-scroll--next";
+          return (
+            node.className === "robot-drawer-face-scroll robot-drawer-face-scroll--next"
+          );
         }
         return false;
       }
@@ -164,7 +168,9 @@ test("expressionsFeature mounts in drawer section and dispatches operator.face o
   // Verifies inner structure with dataset.feature = expressions
   assert.equal(mockHost.firstChild.dataset.feature, "expressions");
   const inner = mockHost.firstChild;
-  const wrap = inner.children.find((c) => c.className === "robot-drawer-face-rail-wrap");
+  const wrap = inner.children.find(
+    (c) => c.className === "robot-drawer-face-rail-wrap",
+  );
   assert.ok(wrap, "must mount face rail wrapper");
   const rail = wrap.children.find((c) => c.className === "robot-drawer-face-rail");
   assert.ok(rail, "must mount horizontal face rail");

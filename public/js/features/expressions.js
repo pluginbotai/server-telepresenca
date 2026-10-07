@@ -96,7 +96,7 @@ function selectFace(face, { send = true } = {}) {
  * @param {import("./registry.js").FeatureContext} ctx
  * @param {(key: string) => string} t
  */
-function buildFaceRail(railEl, ctx, t) {
+function buildFaceRail(railEl, ctx, _t) {
   railEl.replaceChildren();
   const allowedFaces = ctx.caps ? emotionsFaces(ctx.caps) : [];
   const expressionsToShow =

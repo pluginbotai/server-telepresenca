@@ -10,7 +10,7 @@ export function updateDrawerLabels({
   toggleBtn,
   closeBtn,
   quickDockEl,
-  btnQuickVolume,
+  btnQuickVolume: _btnQuickVolume,
   btnQuickHeadReset,
   btnQuickFlashlight,
   btnQuickEmotions,

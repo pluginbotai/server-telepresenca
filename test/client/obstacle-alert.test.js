@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import { test } from "../helpers/test.js";
 import {
   createObstacleAlert,
   OBSTACLE_DEBOUNCE_MS,

@@ -139,8 +139,8 @@
     transform: none;
     justify-content: space-evenly;
     gap: 6px;
-    padding: 8px max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom))
-      max(10px, env(safe-area-inset-left));
+    padding: 8px max(10px, env(safe-area-inset-right))
+      max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
     border-radius: 0;
   }
 

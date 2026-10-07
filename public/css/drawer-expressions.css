@@ -56,11 +56,13 @@
     border-color 0.14s ease;
 }
 
-.robot-drawer-face-rail-wrap.can-scroll-left .robot-drawer-face-scroll--prev:not(:disabled) {
+.robot-drawer-face-rail-wrap.can-scroll-left
+  .robot-drawer-face-scroll--prev:not(:disabled) {
   display: grid;
 }
 
-.robot-drawer-face-rail-wrap.can-scroll-right .robot-drawer-face-scroll--next:not(:disabled) {
+.robot-drawer-face-rail-wrap.can-scroll-right
+  .robot-drawer-face-scroll--next:not(:disabled) {
   display: grid;
 }
 
