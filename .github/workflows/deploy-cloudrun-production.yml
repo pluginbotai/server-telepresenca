@@ -151,8 +151,8 @@ jobs:
           image: ${{ env.REPO_NAME }}/${{ env.SERVICE }}:${{ github.sha }}
 
           # GitHub Environment secrets exposed as Cloud Run env vars.
+          # PORT is reserved by Cloud Run — set via --port below; the platform injects PORT automatically.
           env_vars: |
-            PORT=${{ env.PORT }}
             ROBOTS_API_URL=${{ vars.PRD_ROBOTS_API_URL }}
             CORS_ORIGIN=${{ vars.PRD_CORS_ORIGIN || env.CORS_ORIGIN }}
             STUN_URLS=${{ vars.PRD_STUN_URLS || env.STUN_URLS }}
