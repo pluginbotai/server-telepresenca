@@ -29,7 +29,7 @@ test("drawer-expressions.css enables native horizontal pan on touch devices", ()
   );
   assert.doesNotMatch(
     css,
-    /\.robot-drawer-face-rail-wrap[\s\S{0,120}]*display:\s*flex[\s\S{0,80}]*gap:/,
+    /\.robot-drawer-face-rail-wrap\s*\{[\s\S]{0,200}?display:\s*flex[\s\S]{0,80}?gap:/,
     "Rail wrap avoids flex gap that reserves space for hidden prev button",
   );
 });
