@@ -48,6 +48,8 @@ export function paintEnded(runtime, flags = {}) {
 export function armGrace(runtime) {
   clearGrace(runtime);
   runtime.graceTimer = setTimeout(() => {
+    runtime.peer.cleanupPeer();
+    runtime.rtcWithRobot = false;
     paintEnded(runtime, { transient: false });
   }, RECONNECT_GRACE_MS);
 }

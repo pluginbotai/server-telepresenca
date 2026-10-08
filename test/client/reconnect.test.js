@@ -14,7 +14,7 @@ test("transient disconnects are transport failures, not explicit kicks", () => {
   assert.equal(isTransientDisconnect("ping timeout"), true);
   assert.equal(isTransientDisconnect("io server disconnect"), false);
   assert.equal(isTransientDisconnect("io client disconnect"), false);
-  assert.equal(RECONNECT_GRACE_MS, 20_000);
+  assert.equal(RECONNECT_GRACE_MS, 60_000);
 });
 
 test("invite rejoin is allowed only while the window is open", () => {

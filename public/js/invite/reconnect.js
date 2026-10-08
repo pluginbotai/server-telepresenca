@@ -1,5 +1,8 @@
-/** LiveKit departureTimeout default: 20s of silence before the session is gone. */
-export const RECONNECT_GRACE_MS = 20_000;
+/**
+ * Janela para Socket.IO reconectar antes de derrubar WebRTC/TURN no operador.
+ * Alinhado a OPERATOR_DEPARTURE_GRACE_MS no servidor (60s).
+ */
+export const RECONNECT_GRACE_MS = 60_000;
 
 /**
  * Socket.IO auto-reconnects on transport failures, not on explicit server/client disconnect.

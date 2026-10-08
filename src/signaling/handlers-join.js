@@ -5,6 +5,7 @@ import {
   ROLE_OPERATOR,
   ROLE_ROBOT,
 } from "../protocol/events.js";
+import { clearOperatorDeparture } from "../rooms/departure-grace.js";
 import { isExpired, parseExpiresAt } from "../rooms/expiry.js";
 
 /**
@@ -103,6 +104,9 @@ export function handleJoin(socket, payload, ack, ctx) {
     leaveRoom(socket);
 
     const room = rooms.ensure(join.roomId);
+    if (join.effectiveRole === ROLE_OPERATOR) {
+      clearOperatorDeparture(room);
+    }
     applyJoinExpiry(room, payload);
 
     if (

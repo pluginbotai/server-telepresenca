@@ -111,7 +111,8 @@ export function attachSignaling(io, deps) {
 
     socket.on("disconnect", () => {
       log.info(`[-] disconnected ${socket.id}`);
-      roomHandlers.leaveRoom(socket);
+      const deferGrace = socket.data.role === ROLE_OPERATOR;
+      roomHandlers.leaveRoom(socket, { deferOperatorGrace: deferGrace });
     });
   });
 }
