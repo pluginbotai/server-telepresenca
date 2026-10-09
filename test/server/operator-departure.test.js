@@ -59,7 +59,11 @@ test("explicit operator leave emits peer-left immediately", () => {
   const emissions = [];
   const io = {
     to(_roomId) {
-      return { emit(event, payload) { emissions.push({ event, payload }); } };
+      return {
+        emit(event, payload) {
+          emissions.push({ event, payload });
+        },
+      };
     },
   };
   const { leaveRoom } = createRoomHandlers(/** @type {*} */ (io), { rooms });
@@ -72,7 +76,11 @@ test("explicit operator leave emits peer-left immediately", () => {
     data: { roomId: "sala", role: ROLE_OPERATOR },
     leave() {},
     to(_room) {
-      return { emit(event, payload) { emissions.push({ event, payload }); } };
+      return {
+        emit(event, payload) {
+          emissions.push({ event, payload });
+        },
+      };
     },
   });
 

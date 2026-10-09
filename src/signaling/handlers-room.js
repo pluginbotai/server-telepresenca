@@ -1,48 +1,56 @@
-import { ROLE_OPERATOR, ROLE_ROBOT } from "../protocol/events.js";
-import {
-  clearOperatorDeparture,
-  OPERATOR_DEPARTURE_GRACE_MS,
-} from "../rooms/departure-grace.js";
+import { ROLE_OPERATOR } from "../protocol/events.js";
+import { clearOperatorDeparture } from "../rooms/departure-grace.js";
 import {
   clearExpiryTimer,
   EVENT_SESSION_EXPIRED,
   expiryDelayMs,
   occupantSockets,
 } from "../rooms/lifecycle.js";
+import {
+  beginOperatorDepartureGrace,
+  leaveRoomOccupant,
+} from "./handlers-room-leave.js";
+
+/**
+ * @param {import("socket.io").Server} io
+ * @param {import("socket.io").Socket | undefined} socket
+ * @param {string} event
+ * @param {object} [payload]
+ */
+function kickSocket(io, socket, event, payload) {
+  if (!socket) return;
+  const previousRoom = socket.data.roomId;
+  const previousRole = socket.data.role;
+  if (previousRoom && previousRole) {
+    socket.to(previousRoom).emit("peer-left", {
+      role: previousRole,
+      socketId: socket.id,
+    });
+  }
+  socket.emit(event, payload);
+  socket.data.roomId = undefined;
+  socket.data.role = undefined;
+  if (payload && payload.roomId) {
+    socket.leave(payload.roomId);
+  } else if (previousRoom) {
+    socket.leave(previousRoom);
+  }
+  socket.disconnect(true);
+}
 
 /**
  * @param {import("socket.io").Server} io
  * @param {object} deps
  */
 export function createRoomHandlers(io, { rooms }) {
-  function kickSocket(socket, event, payload) {
-    if (!socket) return;
-    const previousRoom = socket.data.roomId;
-    const previousRole = socket.data.role;
-    if (previousRoom && previousRole) {
-      socket.to(previousRoom).emit("peer-left", {
-        role: previousRole,
-        socketId: socket.id,
-      });
-    }
-    socket.emit(event, payload);
-    socket.data.roomId = undefined;
-    socket.data.role = undefined;
-    if (payload && payload.roomId) {
-      socket.leave(payload.roomId);
-    } else if (previousRoom) {
-      socket.leave(previousRoom);
-    }
-    socket.disconnect(true);
-  }
-
+  const leaveDeps = { io, rooms };
   function expireRoom(roomId) {
     const room = rooms.get(roomId);
     if (!room) return;
     clearExpiryTimer(room);
     clearOperatorDeparture(room);
     for (const occupant of occupantSockets(room)) {
-      kickSocket(io.sockets.sockets.get(occupant.socketId), EVENT_SESSION_EXPIRED, {
+      kickSocket(io, io.sockets.sockets.get(occupant.socketId), EVENT_SESSION_EXPIRED, {
         roomId,
         reason: EVENT_SESSION_EXPIRED,
       });
@@ -76,55 +84,17 @@ export function createRoomHandlers(io, { rooms }) {
     if (!room) return;
 
     if (role === ROLE_OPERATOR && deferOperatorGrace && room.operator === socket.id) {
-      clearOperatorDeparture(room);
-      const departedId = socket.id;
-      room.operatorDepartTimer = setTimeout(() => {
-        const current = rooms.get(roomId);
-        if (!current || current.operator !== departedId) return;
-        delete current.operator;
-        io.to(roomId).emit("peer-left", {
-          role: ROLE_OPERATOR,
-          socketId: departedId,
-        });
-        if (!current.operator && !current.robot) {
-          clearExpiryTimer(current);
-          rooms.delete(roomId);
-        } else {
-          rooms.set(roomId, current);
-        }
-        io.to(roomId).emit("room-state", rooms.state(roomId));
-      }, OPERATOR_DEPARTURE_GRACE_MS);
-      socket.leave(roomId);
-      socket.data.roomId = undefined;
-      socket.data.role = undefined;
-      rooms.set(roomId, room);
-      io.to(roomId).emit("room-state", rooms.state(roomId));
+      beginOperatorDepartureGrace(leaveDeps, socket, roomId, room);
       return;
     }
 
-    clearOperatorDeparture(room);
-
-    if (room[role] === socket.id) {
-      delete room[role];
-      if (role === ROLE_ROBOT) {
-        delete room.lastStatus;
-      }
-    }
-
-    socket.to(roomId).emit("peer-left", { role, socketId: socket.id });
-    socket.leave(roomId);
-
-    if (!room.operator && !room.robot) {
-      clearExpiryTimer(room);
-      rooms.delete(roomId);
-    } else {
-      rooms.set(roomId, room);
-    }
-
-    io.to(roomId).emit("room-state", rooms.state(roomId));
-    socket.data.roomId = undefined;
-    socket.data.role = undefined;
+    leaveRoomOccupant(leaveDeps, { socket, roomId, room, role });
   }
 
-  return { kickSocket, expireRoom, armRoomExpiry, leaveRoom };
+  /** @param {import("socket.io").Socket} socket */
+  function kickOccupant(socket, event, payload) {
+    kickSocket(io, socket, event, payload);
+  }
+
+  return { kickSocket: kickOccupant, expireRoom, armRoomExpiry, leaveRoom };
 }

@@ -17,10 +17,7 @@ export function planMediaResumeStep(ice, conn) {
   if (ice === "disconnected" || conn === "disconnected") {
     return "wait";
   }
-  if (
-    conn === "connected" &&
-    (ice === "connected" || ice === "completed")
-  ) {
+  if (conn === "connected" && (ice === "connected" || ice === "completed")) {
     return "skip";
   }
   if (conn === "closed" || ice === "closed") {
@@ -38,8 +35,7 @@ export function planMediaResumeStep(ice, conn) {
  */
 export async function resumeCallAfterSignalingReconnect(runtime, opts = {}) {
   const sleep =
-    opts.sleep ||
-    ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
+    opts.sleep || ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
 
   if (!runtime.robotPeerPresent) return;
 
