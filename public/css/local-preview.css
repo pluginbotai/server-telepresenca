@@ -17,8 +17,8 @@
   aspect-ratio: 4 / 3;
   border-radius: 14px;
   overflow: hidden;
-  background: rgba(8, 10, 14, 0.72);
-  border: 2px solid rgba(255, 255, 255, 0.18);
+  background: var(--hud);
+  border: 2px solid var(--hud-border);
   box-shadow:
     0 12px 28px rgba(0, 0, 0, 0.45),
     0 0 0 1px rgba(0, 0, 0, 0.35);
@@ -48,10 +48,9 @@
   display: grid;
   place-items: center;
   cursor: pointer;
-  color: rgba(255, 255, 255, 0.92);
-  background: rgba(8, 10, 14, 0.62);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(8px);
+  color: var(--text);
+  background: var(--btn);
+  border: 1px solid var(--hud-border);
   transition:
     background 0.16s ease,
     transform 0.16s var(--ease-snappy);
@@ -63,7 +62,7 @@
 }
 
 .local-preview-close:hover {
-  background: rgba(20, 24, 30, 0.82);
+  background: var(--btn-hover);
   transform: scale(1.06);
 }
 

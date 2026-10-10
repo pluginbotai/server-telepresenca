@@ -10,8 +10,8 @@
   height: 16px;
   padding: 0 4px;
   border-radius: 999px;
-  background: rgba(43, 176, 166, 0.92);
-  color: #041414;
+  background: var(--accent);
+  color: var(--accent-ink);
   font-size: 0.58rem;
   font-weight: 800;
   line-height: 16px;
@@ -47,7 +47,7 @@
 }
 
 .quality-slider:focus-visible {
-  box-shadow: 0 0 0 2px rgba(43, 176, 166, 0.65);
+  box-shadow: 0 0 0 2px var(--accent);
   border-radius: 999px;
 }
 
@@ -59,7 +59,7 @@
   height: 4px;
   transform: translateY(-50%);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.28);
+  background: var(--hud-border);
   overflow: hidden;
 }
 
@@ -67,7 +67,7 @@
   height: 100%;
   width: 0%;
   border-radius: inherit;
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--accent);
   transition: width 0.12s ease;
 }
 
@@ -79,8 +79,8 @@
   height: 18px;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: #fff;
-  border: 2px solid rgba(255, 255, 255, 0.95);
+  background: var(--accent);
+  border: 2px solid var(--accent);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   pointer-events: none;
   transition: left 0.12s ease;

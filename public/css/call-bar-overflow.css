@@ -36,10 +36,9 @@
   margin-bottom: env(safe-area-inset-bottom, 0);
   padding: 0 0 max(12px, env(safe-area-inset-bottom));
   border-radius: 20px 20px 0 0;
-  background: rgba(12, 16, 22, 0.94);
+  background: var(--hud);
   border: 1px solid var(--hud-border);
   border-bottom: none;
-  backdrop-filter: blur(18px);
   box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.55);
   transform: translateY(100%);
   transition: transform 0.24s var(--ease-spring);
@@ -56,7 +55,7 @@
   width: 38px;
   height: 4px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.32);
+  background: var(--hud-border);
   margin: 8px auto 4px;
 }
 
@@ -91,7 +90,7 @@
 }
 
 .call-overflow-item:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--btn);
 }
 
 .call-overflow-item:disabled {
