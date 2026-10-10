@@ -1,4 +1,4 @@
-/* Flat sections inside the glass drawer — no nested card surfaces (NN/g: one glass shell). */
+/* Flat sections inside the opaque drawer — no nested card surfaces. */
 
 .robot-drawer-section {
   display: flex;
@@ -22,7 +22,7 @@
   + .robot-drawer-section:not([hidden]) {
   margin-top: 4px;
   padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  border-top: 1px solid var(--hud-border);
 }
 
 .robot-drawer-section--action {
@@ -56,9 +56,9 @@
   height: 44px;
   flex: none;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--hud-border);
+  background: var(--btn);
+  color: var(--text);
   cursor: pointer;
   padding: 0;
   transition:
@@ -67,15 +67,15 @@
     color 0.14s ease;
 }
 
-.robot-drawer-mute-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.24);
+.robot-drawer-mute-btn:hover:not(:disabled):not([aria-pressed="true"]) {
+  background: var(--btn-hover);
+  border-color: var(--hud-border);
 }
 
 .robot-drawer-mute-btn[aria-pressed="true"] {
-  color: rgba(255, 255, 255, 0.55);
-  border-color: rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  border-color: var(--hud-border);
+  background: #1a1a1d;
 }
 
 .robot-drawer-mute-btn:disabled {
@@ -103,13 +103,13 @@
   font-size: 0.8rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--muted);
   text-align: right;
 }
 
 .volume-slider--drawer {
   --volume-fill: 50%;
-  --volume-track: rgba(255, 255, 255, 0.16);
+  --volume-track: var(--hud-border);
   width: 100%;
   margin: 0;
   cursor: pointer;
@@ -190,9 +190,9 @@
   min-height: 36px;
   padding: 8px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.84);
+  border: 1px solid var(--hud-border);
+  background: var(--btn);
+  color: var(--text);
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
@@ -202,17 +202,17 @@
     color 0.14s ease;
 }
 
-.robot-drawer-preset-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.22);
-  color: #fff;
+.robot-drawer-preset-btn:hover:not(:disabled):not(.is-active) {
+  background: var(--btn-hover);
+  border-color: var(--hud-border);
+  color: var(--text);
 }
 
 .robot-drawer-preset-btn.is-active {
-  color: #041414;
-  background: rgba(43, 176, 166, 0.92);
-  border-color: rgba(43, 176, 166, 0.55);
-  box-shadow: 0 2px 10px rgba(43, 176, 166, 0.28);
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: none;
 }
 
 .robot-drawer-presets-grid {
@@ -237,9 +237,9 @@
   min-height: 40px;
   padding: 8px 6px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.84);
+  border: 1px solid var(--hud-border);
+  background: var(--btn);
+  color: var(--text);
   font-size: 0.78rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -252,17 +252,17 @@
     box-shadow 0.14s ease;
 }
 
-.robot-drawer-segment-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.22);
-  color: #fff;
+.robot-drawer-segment-btn:hover:not(:disabled):not(.is-active) {
+  background: var(--btn-hover);
+  border-color: var(--hud-border);
+  color: var(--text);
 }
 
 .robot-drawer-segment-btn.is-active {
-  color: #041414;
-  background: rgba(43, 176, 166, 0.92);
-  border-color: rgba(43, 176, 166, 0.55);
-  box-shadow: 0 2px 10px rgba(43, 176, 166, 0.28);
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: none;
 }
 
 .robot-drawer-segment-btn:disabled {
@@ -284,9 +284,9 @@
   min-height: 44px;
   padding: 10px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--hud-border);
+  background: var(--btn);
+  color: var(--text);
   font-size: 0.86rem;
   font-weight: 500;
   cursor: pointer;
@@ -304,13 +304,14 @@
 }
 
 .robot-drawer-btn[aria-pressed="true"] {
-  border-color: var(--accent, #3b82f6);
-  background: color-mix(in srgb, var(--accent, #3b82f6) 12%, transparent);
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
-.robot-drawer-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.11);
-  border-color: rgba(255, 255, 255, 0.24);
+.robot-drawer-btn:hover:not(:disabled):not([aria-pressed="true"]) {
+  background: var(--btn-hover);
+  border-color: var(--hud-border);
 }
 
 .robot-drawer-btn:disabled {
@@ -333,7 +334,7 @@
   min-width: 0;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text);
   letter-spacing: 0.01em;
 }
 
@@ -348,9 +349,9 @@
   height: 30px;
   border-radius: 9px;
   flex: none;
-  color: var(--accent);
-  background: rgba(43, 176, 166, 0.1);
-  border: 1px solid rgba(43, 176, 166, 0.18);
+  color: var(--text);
+  background: var(--btn);
+  border: 1px solid var(--hud-border);
 }
 
 .robot-drawer-section-icon svg {
@@ -369,11 +370,11 @@
   font-size: 0.75rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--accent);
+  color: var(--text);
   padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(43, 176, 166, 0.1);
-  border: 1px solid rgba(43, 176, 166, 0.2);
+  background: var(--btn);
+  border: 1px solid var(--hud-border);
 }
 
 .robot-drawer-section-badge:empty {

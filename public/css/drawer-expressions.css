@@ -6,7 +6,7 @@
 }
 
 .robot-drawer-face-rail-wrap:focus-visible {
-  outline: 2px solid rgba(43, 176, 166, 0.55);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 12px;
 }
@@ -42,9 +42,9 @@
   height: 28px;
   padding: 0;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(12, 16, 22, 0.92);
-  color: #fff;
+  border: 1px solid var(--hud-border);
+  background: var(--btn);
+  color: var(--text);
   display: none;
   place-items: center;
   cursor: pointer;
@@ -79,8 +79,8 @@
 }
 
 .robot-drawer-face-scroll:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.28);
+  background: var(--btn-hover);
+  border-color: var(--hud-border);
 }
 
 .robot-drawer-face-scroll:disabled {
@@ -101,9 +101,9 @@
   height: 56px;
   padding: 0;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
+  border: 1px solid var(--hud-border);
+  background: var(--btn);
+  color: var(--text);
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -119,17 +119,17 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .robot-drawer-face-tile:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.26);
+  .robot-drawer-face-tile:hover:not(:disabled):not(.is-active) {
+    background: var(--btn-hover);
+    border-color: var(--hud-border);
     transform: scale(1.04);
   }
 }
 
 .robot-drawer-face-tile.is-active {
-  background: rgba(43, 176, 166, 0.92);
-  border-color: rgba(43, 176, 166, 0.55);
-  box-shadow: 0 2px 12px rgba(43, 176, 166, 0.32);
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: none;
 }
 
 .robot-drawer-face-emoji {

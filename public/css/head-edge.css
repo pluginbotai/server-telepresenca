@@ -9,8 +9,8 @@
   pointer-events: auto;
   touch-action: none;
   --head-edge-pct: 50%;
-  --head-edge-glow: rgba(120, 200, 255, 0.55);
-  --head-edge-track: rgba(255, 255, 255, 0.1);
+  --head-edge-glow: rgba(244, 244, 245, 0.55);
+  --head-edge-track: #3f3f46;
   --head-edge-thumb-size: 0px;
   opacity: 0.35;
   transition:
@@ -75,7 +75,6 @@
   position: absolute;
   border-radius: 999px;
   background: var(--head-edge-track);
-  backdrop-filter: blur(8px);
   transition:
     background 0.3s ease,
     box-shadow 0.3s ease;
@@ -99,8 +98,8 @@
 
 .head-look-layer.head-edge--revealed .head-edge-track,
 .head-look-layer.head-edge--interacting .head-edge-track {
-  background: rgba(255, 255, 255, 0.16);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+  background: var(--accent);
+  box-shadow: none;
 }
 
 .head-look-layer.head-edge--revealed .head-edge-rail--horizontal .head-edge-track,
@@ -118,7 +117,7 @@
 .head-edge-center {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.28);
+  background: var(--accent);
   opacity: 0.45;
   transition: opacity 0.3s ease;
 }
@@ -176,7 +175,7 @@
 .head-edge-thumb {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--accent);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.35),
     0 4px 16px rgba(0, 0, 0, 0.45),
