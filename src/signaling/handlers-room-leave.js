@@ -51,7 +51,11 @@ export function beginOperatorDepartureGrace(deps, socket, roomId, room) {
 export function leaveRoomOccupant(deps, leave) {
   const { io, rooms } = deps;
   const { socket, roomId, room, role } = leave;
-  clearOperatorDeparture(room);
+  // A robot leaving must not cancel the operator grace timer. Doing so
+  // keeps the departed operator id in the room with nothing left to remove it.
+  if (role === ROLE_OPERATOR) {
+    clearOperatorDeparture(room);
+  }
 
   if (room[role] === socket.id) {
     delete room[role];

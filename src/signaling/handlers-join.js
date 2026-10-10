@@ -37,21 +37,24 @@ function parseJoinPayload(payload) {
 }
 
 /**
- * @param {object} room
  * @param {unknown} payload
+ * @returns {number | null}
  */
-function applyJoinExpiry(room, payload) {
+function readIncomingExpiry(payload) {
   const body = /** @type {JoinPayload} */ (
     payload && typeof payload === "object" ? payload : {}
   );
-  const incomingExpiry = parseExpiresAt(
-    body.expiresAt != null ? body.expiresAt : body.expires_at,
-  );
-  if (isExpired(incomingExpiry) || isExpired(room.expiresAt)) {
+  return parseExpiresAt(body.expiresAt != null ? body.expiresAt : body.expires_at);
+}
+
+/**
+ * Reject before creating a room. A failed join must not leave an empty room behind.
+ * @param {import("../rooms/store.js").Room | undefined} existing
+ * @param {number | null} incomingExpiry
+ */
+function assertJoinNotExpired(existing, incomingExpiry) {
+  if (isExpired(incomingExpiry) || isExpired(existing?.expiresAt)) {
     throw new Error("session expired");
-  }
-  if (incomingExpiry) {
-    room.expiresAt = incomingExpiry;
   }
 }
 
@@ -103,11 +106,15 @@ export function handleJoin(socket, payload, ack, ctx) {
     const join = parseJoinPayload(payload);
     leaveRoom(socket);
 
+    const existing = rooms.get(join.roomId);
+    const incomingExpiry = readIncomingExpiry(payload);
+    assertJoinNotExpired(existing, incomingExpiry);
+
     const room = rooms.ensure(join.roomId);
     if (join.effectiveRole === ROLE_OPERATOR) {
       clearOperatorDeparture(room);
     }
-    applyJoinExpiry(room, payload);
+    if (incomingExpiry) room.expiresAt = incomingExpiry;
 
     if (
       join.effectiveRole === ROLE_ROBOT &&

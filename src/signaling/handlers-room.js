@@ -12,6 +12,12 @@ import {
 } from "./handlers-room-leave.js";
 
 /**
+ * Node clamps timer delays above this to 1ms, which would expire a long
+ * session immediately. https://nodejs.org/api/timers.html#settimeoutcallback-delay-args
+ */
+const TIMEOUT_MAX_MS = 2_147_483_647;
+
+/**
  * @param {import("socket.io").Server} io
  * @param {import("socket.io").Socket | undefined} socket
  * @param {string} event
@@ -58,6 +64,23 @@ export function createRoomHandlers(io, { rooms }) {
     rooms.delete(roomId);
   }
 
+  function scheduleExpiry(roomId, delay) {
+    const room = rooms.get(roomId);
+    if (!room) return;
+    const slice = Math.min(delay, TIMEOUT_MAX_MS);
+    room.expiryTimer = setTimeout(() => {
+      const current = rooms.get(roomId);
+      if (!current) return;
+      const remaining = expiryDelayMs(current.expiresAt);
+      if (remaining == null || remaining <= 0) {
+        expireRoom(roomId);
+        return;
+      }
+      scheduleExpiry(roomId, remaining);
+    }, slice);
+    rooms.set(roomId, room);
+  }
+
   function armRoomExpiry(roomId) {
     const room = rooms.get(roomId);
     if (!room) return;
@@ -68,8 +91,7 @@ export function createRoomHandlers(io, { rooms }) {
       expireRoom(roomId);
       return;
     }
-    room.expiryTimer = setTimeout(() => expireRoom(roomId), delay);
-    rooms.set(roomId, room);
+    scheduleExpiry(roomId, delay);
   }
 
   /**
