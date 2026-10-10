@@ -8,7 +8,7 @@ import { registerSocketHandlers } from "./handlers-socket.js";
 export function attachSignaling(io, deps) {
   const { rooms, log } = deps;
   const roomHandlers = createRoomHandlers(io, { rooms });
-  const ctx = { ...deps, ...roomHandlers };
+  const ctx = { ...deps, ...roomHandlers, io };
 
   io.on("connection", (socket) => {
     log.info(`[+] connected ${socket.id}`);
