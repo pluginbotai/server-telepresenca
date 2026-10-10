@@ -9,25 +9,48 @@ export function isScreenShareSupported(
 }
 
 /**
+ * Transceiver recvonly tem sender de vídeo com track nula. getSenders()
+ * filtrado por track perde esse sender e o compartilhamento não sai.
+ *
+ * @param {RTCPeerConnection | null} pc
+ */
+function videoTransceiver(pc) {
+  if (!pc || typeof pc.getTransceivers !== "function") return null;
+  return (
+    pc.getTransceivers().find((item) => {
+      const kind = item.receiver?.track?.kind || item.sender?.track?.kind;
+      return kind === "video";
+    }) || null
+  );
+}
+
+/**
  * @param {RTCPeerConnection | null} pc
  */
 export function getVideoSender(pc) {
   if (!pc) return null;
+  const transceiver = videoTransceiver(pc);
+  if (transceiver?.sender) return transceiver.sender;
+  const senders = typeof pc.getSenders === "function" ? pc.getSenders() : [];
   return (
-    pc.getSenders().find((sender) => sender.track && sender.track.kind === "video") ||
-    null
+    senders.find((sender) => sender.track && sender.track.kind === "video") || null
   );
 }
 
 /**
  * @param {RTCPeerConnection | null} pc
  * @param {MediaStreamTrack | null} newTrack
+ * @returns {Promise<{ ok: boolean, needsRenegotiation: boolean }>}
  */
 export async function swapVideoTrack(pc, newTrack) {
   const sender = getVideoSender(pc);
-  if (!sender) return false;
+  if (!sender) return { ok: false, needsRenegotiation: false };
+  const transceiver = videoTransceiver(pc);
+  const needsRenegotiation =
+    transceiver?.direction === "recvonly" || transceiver?.direction === "inactive";
+  if (needsRenegotiation) transceiver.direction = "sendrecv";
   await sender.replaceTrack(newTrack);
-  return true;
+  return { ok: true, needsRenegotiation };
 }
 
 /**
@@ -67,6 +90,7 @@ export function stopMediaStream(stream) {
  * @param {() => Promise<MediaStream>} [options.getDisplayMedia]
  * @param {(active: boolean) => void} [options.onStateChange]
  * @param {(err: Error) => void} [options.onError]
+ * @param {() => Promise<void> | void} [options.renegotiate]
  */
 export function createScreenShareController({
   getPc,
@@ -74,6 +98,7 @@ export function createScreenShareController({
   getDisplayMedia,
   onStateChange = () => {},
   onError = () => {},
+  renegotiate = null,
 }) {
   let screenStream = null;
   let active = false;
@@ -95,8 +120,10 @@ export function createScreenShareController({
       onError(new Error("Screen sharing not supported on this device/browser"));
       return false;
     }
+    /** @type {MediaStream | null} */
+    let stream = null;
     try {
-      const stream = await acquireDisplayStream(getDisplayMedia);
+      stream = await acquireDisplayStream(getDisplayMedia);
       const track = stream?.getVideoTracks()?.[0];
       if (!track) throw new Error("No video track found in screen share stream");
       try {
@@ -104,13 +131,23 @@ export function createScreenShareController({
       } catch {
         /* ignore */
       }
-      await swapVideoTrack(getPc(), track);
+      const swapped = await swapVideoTrack(getPc(), track);
+      if (!swapped.ok) {
+        stopMediaStream(stream);
+        stream = null;
+        onError(new Error("No video sender available for screen share"));
+        return false;
+      }
+      if (swapped.needsRenegotiation && typeof renegotiate === "function") {
+        await renegotiate();
+      }
       screenStream = stream;
       active = true;
       track.onended = handleTrackEnded;
       onStateChange(true);
       return true;
     } catch (err) {
+      if (!active && stream) stopMediaStream(stream);
       onError(err);
       return false;
     }
