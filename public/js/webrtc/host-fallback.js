@@ -50,12 +50,13 @@ export function createHostFallback({
     },
     /**
      * @param {string} reason
+     * @returns {Promise<boolean>} true só quando o ICE foi reiniciado com os servidores de reserva
      */
     async escalate(reason) {
-      if (used) return;
+      if (used) return false;
       const servers = getFallbackServers() || [];
       const connection = getPc();
-      if (!connection || !servers.length) return;
+      if (!connection || !servers.length) return false;
       used = true;
       clearTimer();
       console.warn(
@@ -68,6 +69,7 @@ export function createHostFallback({
         rtcpMuxPolicy: "require",
       });
       await restart({ iceRestart: true, escalate: true });
+      return true;
     },
   };
 }

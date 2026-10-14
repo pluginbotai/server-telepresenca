@@ -17,7 +17,7 @@
   grid-template-columns: repeat(3, 34px);
   grid-template-rows: 34px 34px;
   gap: 5px;
-  opacity: 0.42;
+  opacity: 1;
   pointer-events: none;
 }
 
@@ -25,13 +25,13 @@
   display: grid;
   place-items: center;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(12, 16, 22, 0.28);
-  color: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--hud-border);
+  background: var(--hud);
+  color: var(--text);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  box-shadow: none;
 }
 
 .kbd-key[data-key="w"] {
@@ -56,9 +56,9 @@
 
 .kbd-key.is-active {
   opacity: 1;
-  color: #041414;
-  background: rgba(43, 176, 166, 0.86);
-  border-color: rgba(43, 176, 166, 0.95);
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .joystick {
@@ -66,17 +66,10 @@
   width: 148px;
   height: 148px;
   border-radius: 50%;
-  background: radial-gradient(
-    circle at 50% 42%,
-    rgba(255, 255, 255, 0.16),
-    rgba(8, 12, 16, 0.28) 62%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
-    var(--shadow);
-  backdrop-filter: blur(10px);
-  opacity: 0.48;
+  background: var(--hud);
+  border: 1px solid var(--hud-border);
+  box-shadow: var(--shadow);
+  opacity: 1;
   touch-action: none;
   cursor: grab;
   transition:
@@ -85,13 +78,13 @@
 }
 
 .joystick.is-active {
-  opacity: 0.92;
+  opacity: 1;
   cursor: grabbing;
 }
 
 @media (hover: hover) {
   .joystick:hover {
-    opacity: 0.86;
+    opacity: 1;
   }
 }
 
@@ -107,13 +100,8 @@
   width: 58px;
   height: 58px;
   border-radius: 50%;
-  background: radial-gradient(
-    circle at 35% 30%,
-    rgba(255, 255, 255, 0.55),
-    rgba(180, 196, 210, 0.28) 42%,
-    rgba(20, 28, 36, 0.55)
-  );
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: var(--btn);
+  border: 1px solid var(--hud-border);
   transform: translate(-50%, -50%);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
   pointer-events: none;
@@ -166,7 +154,7 @@
   text-align: center;
   font-size: 0.7rem;
   line-height: 1.35;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--muted);
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
 }
 
@@ -205,9 +193,9 @@
   transform: translateX(-50%);
   padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(12, 16, 22, 0.38);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: rgba(255, 255, 255, 0.78);
+  background: var(--hud);
+  border: 1px solid var(--hud-border);
+  color: var(--text);
   font-size: 0.78rem;
   letter-spacing: 0.01em;
   pointer-events: none;

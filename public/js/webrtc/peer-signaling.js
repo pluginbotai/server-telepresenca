@@ -33,34 +33,106 @@ export async function startCallAsOfferer(
   }
 }
 
+/**
+ * Vídeo do robô ainda não chegou. "wait" não mexe numa ICE que ainda sobe.
+ * "resend" repete a offer já criada (a answer se perdeu no sinal).
+ * "restart" só quando a ICE morreu ou a PeerConnection fechou.
+ *
+ * @param {{ connectionState?: string, signalingState?: string, retryCount?: number, maxRetries?: number }} input
+ * @returns {"stop" | "wait" | "resend" | "restart" | "renegotiate"}
+ */
+export function planOfferRetryAction({
+  connectionState,
+  signalingState,
+  retryCount = 0,
+  maxRetries = MAX_OFFER_RETRIES,
+}) {
+  if (retryCount >= maxRetries) return "stop";
+  if (connectionState === "connected" || connectionState === "connecting")
+    return "wait";
+  if (connectionState === "closed" || signalingState === "closed") return "restart";
+  if (signalingState === "have-local-offer") return "resend";
+  if (connectionState === "failed" || connectionState === "disconnected")
+    return "restart";
+  return "renegotiate";
+}
+
 /** @param {object} runtime */
 export function scheduleOfferRetryIfNeeded(runtime) {
   runtime.clearOfferRetryTimer();
-  runtime.offerRetryTimer = setTimeout(async () => {
-    if (!runtime.getSocket() || !runtime.pc) return;
-    if (runtime.hasRenderableRemoteVideo()) {
-      runtime.clearOfferRetry();
-      return;
-    }
-    if (runtime.offerRetryCount >= MAX_OFFER_RETRIES) return;
-    const state = runtime.pc.connectionState;
-    if (state === "connected" || state === "connecting") {
-      runtime.offerRetryCount += 1;
-      if (runtime.offerRetryCount < MAX_OFFER_RETRIES)
-        scheduleOfferRetryIfNeeded(runtime);
-      return;
-    }
-    runtime.offerRetryCount += 1;
-    console.warn("Sem vídeo do robô; renegociando.", runtime.offerRetryCount, state);
+  runtime.offerRetryTimer = setTimeout(() => {
+    runOfferRetry(runtime).catch((err) => console.warn("Offer retry failed", err));
+  }, 4000);
+}
+
+/**
+ * Um passo do retry. Separado do timer para o teste ver o efeito sem esperar 4s.
+ *
+ * @param {object} runtime
+ */
+export async function runOfferRetry(runtime) {
+  if (!runtime.getSocket() || !runtime.pc) return;
+  if (runtime.hasRenderableRemoteVideo()) {
+    runtime.clearOfferRetry();
+    return;
+  }
+  const action = planOfferRetryAction({
+    connectionState: runtime.pc.connectionState,
+    signalingState: runtime.pc.signalingState,
+    retryCount: runtime.offerRetryCount,
+  });
+  if (action === "stop") return;
+  runtime.offerRetryCount += 1;
+  if (action !== "wait") {
+    console.warn(
+      "Sem vídeo do robô; renegociando.",
+      runtime.offerRetryCount,
+      action,
+      runtime.pc.connectionState,
+    );
     try {
-      if (state === "failed") {
-        await runtime.hostFallback.escalate(state);
-      }
+      await applyOfferRetry(runtime, action);
     } catch (err) {
       console.warn("Offer retry failed", err);
     }
+  }
+  if (runtime.offerRetryCount < MAX_OFFER_RETRIES) {
     scheduleOfferRetryIfNeeded(runtime);
-  }, 4000);
+  }
+}
+
+/**
+ * @param {object} runtime
+ * @param {"resend" | "restart" | "renegotiate"} action
+ */
+async function applyOfferRetry(runtime, action) {
+  const socket = runtime.getSocket();
+  if (!socket || !runtime.pc) return;
+  if (action === "resend") {
+    const description = runtime.pc.localDescription;
+    if (!description) return;
+    socket.emit(EVENT_SIGNAL, {
+      type: SIGNAL_OFFER,
+      data: offerSignalData(description, false),
+    });
+    return;
+  }
+  if (
+    action === "restart" &&
+    (runtime.pc.connectionState === "closed" || runtime.pc.signalingState === "closed")
+  ) {
+    await createPeerConnection(runtime);
+    await startCallAsOfferer(runtime);
+    return;
+  }
+  if (runtime.pc.signalingState !== "stable") return;
+  if (action === "restart" && runtime.pc.connectionState === "failed") {
+    const escalated = await runtime.hostFallback.escalate("failed");
+    if (escalated) return;
+  }
+  await startCallAsOfferer(runtime, {
+    iceRestart: action === "restart",
+  });
 }
 
 /** @param {object} runtime */
@@ -95,6 +167,7 @@ export async function handlePeerSignal(runtime, message) {
     await runtime.iceQueue.flush((candidate) => runtime.pc.addIceCandidate(candidate));
     const answer = await runtime.pc.createAnswer();
     await runtime.pc.setLocalDescription(answer);
+    if (!socket) return;
     socket.emit(EVENT_SIGNAL, {
       type: SIGNAL_ANSWER,
       data: runtime.pc.localDescription,
@@ -103,6 +176,9 @@ export async function handlePeerSignal(runtime, message) {
   }
 
   if (message.type === SIGNAL_ANSWER) {
+    // Answer atrasada ou repetida, com a sinalização já estável, rejeita
+    // setRemoteDescription e o handler pintava a chamada como erro.
+    if (runtime.pc.signalingState !== "have-local-offer") return;
     await runtime.pc.setRemoteDescription(message.data);
     await runtime.iceQueue.flush((candidate) => runtime.pc.addIceCandidate(candidate));
     return;

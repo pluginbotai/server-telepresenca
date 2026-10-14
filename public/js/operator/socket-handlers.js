@@ -10,7 +10,7 @@ import {
   EVENT_ROBOT_ALERT,
 } from "../protocol/events.js";
 import { buildFeatureContext } from "./feature-context.js";
-import { beginCallWithRobot } from "./call-setup.js";
+import { beginCallWithRobot, resumeCallAfterReconnect } from "./call-setup.js";
 import { armGrace, clearGrace, paintEnded } from "./session-end.js";
 import { isTransientDisconnect } from "../invite/reconnect.js";
 
@@ -27,6 +27,8 @@ function registerJoinHandlers(runtime, socket) {
     if (runtime.endedByExpiry) return;
     runtime.endedByReplace = false;
     clearGrace(runtime);
+    const isSignalingReconnect = runtime.signalingHasConnectedOnce;
+    runtime.signalingHasConnectedOnce = true;
     status.setStatus("status.connected", "online");
     const ack = await signaling.join(
       runtime.roomId,
@@ -39,6 +41,9 @@ function registerJoinHandlers(runtime, socket) {
       return;
     }
     if (ack?.robot) runtime.robotPeerPresent = true;
+    if (ack?.robot && isSignalingReconnect) {
+      await resumeCallAfterReconnect(runtime);
+    }
     if (ack?.robotCapabilities) {
       runtime.applyRobotCapabilities(ack.robotCapabilities);
     } else {
@@ -158,16 +163,19 @@ function registerSessionHandlers(runtime, socket) {
 
   socket.on("disconnect", (reason) => {
     locomotion.stopMovement(true);
-    peer.cleanupPeer();
     runtime.setConnectedUi(false);
+    const transient = isTransientDisconnect(reason);
     if (runtime.endedByExpiry) {
+      peer.cleanupPeer();
       paintEnded(runtime, { expired: true });
       return;
     }
-    if (runtime.endedByReplace || !isTransientDisconnect(reason)) {
+    if (runtime.endedByReplace || !transient) {
+      peer.cleanupPeer();
       paintEnded(runtime, { replaced: runtime.endedByReplace, transient: false });
       return;
     }
+    status.setStatus("status.reconnecting", "");
     paintEnded(runtime, { transient: true });
     armGrace(runtime);
   });

@@ -1,5 +1,6 @@
 import { savePresetId } from "../features/video-quality.js";
 import { applyOutgoingVideoQuality } from "../webrtc/quality.js";
+import { resumeCallAfterSignalingReconnect } from "../webrtc/resume-call.js";
 
 /** @param {import("./runtime.js").OperatorRuntime} runtime */
 export async function handleQualityPresetChange(runtime, preset) {
@@ -20,6 +21,14 @@ export async function handleQualityPresetChange(runtime, preset) {
   } finally {
     runtime.qualityApplying = false;
   }
+}
+
+/** @param {import("./runtime.js").OperatorRuntime} runtime */
+export async function resumeCallAfterReconnect(runtime) {
+  await resumeCallAfterSignalingReconnect({
+    ...runtime,
+    beginCallWithRobot: () => beginCallWithRobot(runtime),
+  });
 }
 
 /** @param {import("./runtime.js").OperatorRuntime} runtime */

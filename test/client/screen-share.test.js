@@ -171,6 +171,63 @@ test("screenShareController gracefully handles permission cancellation (NotAllow
   assert.deepEqual(errors, ["NotAllowedError"]);
 });
 
+test("screen share without a video sender stops the capture and stays off", async () => {
+  const screenTrack = createMockTrack("video");
+  const errors = [];
+  const controller = createScreenShareController({
+    getPc: () => ({ getSenders: () => [] }),
+    getCamTrack: () => null,
+    getDisplayMedia: async () => ({
+      getVideoTracks: () => [screenTrack],
+      getTracks: () => [screenTrack],
+    }),
+    onError: (err) => errors.push(err.message),
+  });
+
+  const started = await controller.start();
+  assert.equal(started, false);
+  assert.equal(controller.isSharing(), false);
+  assert.equal(screenTrack.isStopped, true);
+  assert.equal(errors.length, 1);
+});
+
+test("screen share on a recvonly video transceiver replaces the empty sender and renegotiates", async () => {
+  const screenTrack = createMockTrack("video");
+  const sender = {
+    track: null,
+    replaceTrack: async (track) => {
+      sender.track = track;
+    },
+  };
+  const transceiver = {
+    direction: "recvonly",
+    sender,
+    receiver: { track: { kind: "video" } },
+  };
+  let renegotiated = 0;
+  const controller = createScreenShareController({
+    getPc: () => ({
+      getTransceivers: () => [transceiver],
+      getSenders: () => [sender],
+    }),
+    getCamTrack: () => null,
+    getDisplayMedia: async () => ({
+      getVideoTracks: () => [screenTrack],
+      getTracks: () => [screenTrack],
+    }),
+    renegotiate: async () => {
+      renegotiated += 1;
+    },
+  });
+
+  const started = await controller.start();
+  assert.equal(started, true);
+  assert.equal(controller.isSharing(), true);
+  assert.equal(transceiver.direction, "sendrecv");
+  assert.equal(sender.track, screenTrack);
+  assert.equal(renegotiated, 1);
+});
+
 test("screenShareController returns false when getDisplayMedia is not available", async () => {
   const cameraTrack = createMockTrack("video");
   const mockPeer = createMockPeer(cameraTrack);

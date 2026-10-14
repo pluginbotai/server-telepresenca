@@ -20,6 +20,11 @@ export function createMediaController(options) {
       console.warn("Screen share error:", err);
       refresh(true);
     },
+    renegotiate: () => {
+      const pc = getPc();
+      if (!pc || pc.signalingState !== "stable" || !getSocket()) return undefined;
+      return startCallAsOfferer();
+    },
   });
 
   const runtime = {

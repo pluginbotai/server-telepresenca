@@ -46,6 +46,7 @@ import { initOperatorMedia } from "./init-media.js";
  * @property {object | null} robotCapabilities
  * @property {boolean} qualityApplying
  * @property {boolean} callStartInFlight
+ * @property {boolean} signalingHasConnectedOnce
  * @property {(opts?: object) => void} disconnect
  * @property {(preset: object) => Promise<void>} handleQualityPresetChange
  * @property {() => Promise<void>} beginCallWithRobot
@@ -123,6 +124,7 @@ export function createOperatorRuntime(options) {
     robotCapabilities: null,
     qualityApplying: false,
     callStartInFlight: false,
+    signalingHasConnectedOnce: false,
     disconnect: (opts) => disconnectOperator(runtime, opts),
     handleQualityPresetChange: async () => {},
     beginCallWithRobot: async () => {},

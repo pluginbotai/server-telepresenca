@@ -23,7 +23,6 @@
   border-radius: 999px;
   background: var(--hud);
   border: 1px solid rgba(255, 171, 64, 0.38);
-  backdrop-filter: blur(12px);
   box-shadow: 0 10px 32px rgba(0, 0, 0, 0.35);
   font-size: 0.78rem;
   font-weight: 500;

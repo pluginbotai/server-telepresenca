@@ -35,7 +35,7 @@
 
 .room-label {
   font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--muted);
   letter-spacing: 0.02em;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
   max-width: min(48vw, 280px);
@@ -65,10 +65,9 @@
   line-height: 1;
   border-radius: 999px;
   text-align: center;
-  color: rgba(243, 247, 251, 0.7);
+  color: var(--text);
   background: var(--hud);
   border: 1px solid var(--hud-border);
-  backdrop-filter: blur(12px);
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
 }
 
@@ -109,7 +108,6 @@
   border-radius: 999px;
   background: var(--hud);
   border: 1px solid var(--hud-border);
-  backdrop-filter: blur(12px);
   color: var(--ok);
   font-size: 0.78rem;
   font-variant-numeric: tabular-nums;
@@ -131,7 +129,7 @@
 }
 
 .power-chip.is-charging {
-  border-color: rgba(62, 207, 142, 0.45);
+  border-color: var(--text);
 }
 
 .status-chip {
@@ -145,8 +143,7 @@
   border-radius: 999px;
   background: var(--hud);
   border: 1px solid var(--hud-border);
-  backdrop-filter: blur(12px);
-  color: rgba(243, 247, 251, 0.86);
+  color: var(--text);
   font-size: 0.78rem;
   max-width: min(70vw, 280px);
   overflow: hidden;
@@ -164,7 +161,7 @@
   height: 7px;
   border-radius: 50%;
   background: var(--ok);
-  box-shadow: 0 0 0 3px rgba(62, 207, 142, 0.18);
+  box-shadow: none;
   flex: none;
 }
 
@@ -183,7 +180,6 @@
   border-radius: 10px;
   border: 1px solid var(--hud-border);
   background: var(--hud);
-  backdrop-filter: blur(12px);
   cursor: pointer;
 }
 
@@ -206,9 +202,8 @@
   list-style: none;
   min-width: 168px;
   border-radius: 14px;
-  background: rgba(12, 16, 22, 0.92);
+  background: var(--hud);
   border: 1px solid var(--hud-border);
-  backdrop-filter: blur(16px);
   box-shadow: var(--shadow);
   z-index: 12;
 }
@@ -231,7 +226,7 @@
 
 .lang-menu button:hover,
 .lang-menu button.is-active {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--btn);
 }
 
 .hidden {
